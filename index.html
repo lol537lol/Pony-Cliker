@@ -205,7 +205,7 @@
         <div class="clicker-container">
             <button id="clicker-button">
                 Нажми на меня
-                <img src="images/pony.png" alt="Pony">
+                <img src="images/pony.png" alt="Pony" onerror="this.onerror=null; this.src='images/default-pony.png'">
             </button>
             <div id="coin-counter">Монеты: 0</div>
         </div>
@@ -218,7 +218,7 @@
             <p>Вы достигли 30 монет и прошли игру!</p>
             <p id="countdown-timer">Закрытие через: 15 секунд</p> <!-- Таймер в поздравительном окне -->
             <p style="font-size: 16px; color: #f0f0f0;">Спасибо за игру!!!</p> <!-- Дополнительный текст -->
-            <img src="images/congrats.png" alt="Поздравляем!" class="show">
+            <img src="images/congrats.png" alt="Поздравляем!" class="show" onerror="this.style.display='none'">
             <p style="margin-top: 10px; font-size: 16px; color: #B0C4DE;">
                 Разработчик: Black Smoke
             </p>
@@ -270,14 +270,19 @@
         }
 
         closeButton.addEventListener('click', () => {
-            congratsOverlay.style.visibility = 'hidden';
             congratsOverlay.style.opacity = '0';
+            congratsOverlay.style.visibility = 'hidden';
+            const congratsWindow = document.querySelector('.congrats-window');
+            congratsWindow.classList.remove('show');
         });
 
         function easterEggClick() {
             const egg = document.querySelector('.easter-egg');
             egg.style.animation = 'shake 0.5s';
-            setTimeout(() => egg.style.animation = '', 500);
+            setTimeout(() => {
+                egg.style.animation = ''; // Сброс анимации
+            }, 500);
+            alert('Вы нашли пасхалку!'); // Уведомление о пасхалке
         }
     </script>
 </body>
