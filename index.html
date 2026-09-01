@@ -167,6 +167,30 @@
       font-size: 0.92rem;
     }
 
+    .cheat-panel {
+      display: grid;
+      gap: 12px;
+      margin-top: 6px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .cheat-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .cheat-input-row input {
+      flex: 1;
+      min-width: 0;
+      background: var(--panel-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
     .rare-cheat-chip {
       position: fixed;
       z-index: 35;
@@ -1180,6 +1204,7 @@
         particles: true,
         reducedMotion: false,
         autosave: true,
+        cheatAutoApply: true,
         theme: 'light'
       }
     });
@@ -1305,6 +1330,55 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     }
 
+    function ensureAudioContext() {
+      const AudioCtor = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtor) return null;
+      if (!window.__ponyAudioCtx) {
+        window.__ponyAudioCtx = new AudioCtor();
+      }
+      if (window.__ponyAudioCtx.state === 'suspended') {
+        window.__ponyAudioCtx.resume();
+      }
+      return window.__ponyAudioCtx;
+    }
+
+    function playTone({ frequency = 440, duration = 0.08, volume = 0.04, type = 'sine', slideTo = null }) {
+      if (!state.settings.sound) return;
+      const context = ensureAudioContext();
+      if (!context) return;
+
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+      if (slideTo) {
+        oscillator.frequency.exponentialRampToValueAtTime(slideTo, context.currentTime + duration);
+      }
+      gain.gain.setValueAtTime(0.0001, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(volume, context.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start();
+      oscillator.stop(context.currentTime + duration);
+    }
+
+    function playClickSound(isCritical = false) {
+      if (!state.settings.sound) return;
+      if (isCritical) {
+        playTone({ frequency: 620, duration: 0.12, volume: 0.05, type: 'square', slideTo: 820 });
+        playTone({ frequency: 920, duration: 0.08, volume: 0.03, type: 'triangle', slideTo: 720 });
+        return;
+      }
+      playTone({ frequency: 250, duration: 0.06, volume: 0.025, type: 'triangle', slideTo: 210 });
+    }
+
+    function playAchievementSound() {
+      if (!state.settings.sound) return;
+      playTone({ frequency: 440, duration: 0.12, volume: 0.045, type: 'sine', slideTo: 620 });
+      playTone({ frequency: 680, duration: 0.16, volume: 0.03, type: 'triangle', slideTo: 820 });
+    }
+
     function showToast(message, type = 'success') {
       if (!state.settings.animations) return;
       const toast = document.createElement('div');
@@ -1316,9 +1390,24 @@
       }, 2600);
     }
 
-    function applySmallCheat(code) {
-      const bonus = SMALL_CHEAT_CODES.find((entry) => entry.code === code);
-      if (!bonus) return false;
+    function applyCheatCode(rawCode) {
+      const value = String(rawCode || '').trim();
+      if (!value) {
+        showToast('Введите чит-код', 'warning');
+        return false;
+      }
+
+      const normalized = value.toLowerCase();
+      if (normalized === MEGA_CHEAT_CODE) {
+        unlockAllAchievements();
+        return true;
+      }
+
+      const bonus = SMALL_CHEAT_CODES.find((entry) => entry.code.toLowerCase() === normalized);
+      if (!bonus) {
+        showToast('Неизвестный чит-код', 'warning');
+        return false;
+      }
 
       if (bonus.coins) {
         state.coins += bonus.coins;
@@ -1334,6 +1423,10 @@
       renderLiveHud();
       saveGame();
       return true;
+    }
+
+    function applySmallCheat(code) {
+      return applyCheatCode(code);
     }
 
     function unlockAllAchievements() {
@@ -1354,16 +1447,7 @@
 
       showToast('Чит-код активирован! Все достижения открыты и выдано 2 000 000 монет.', 'critical');
       window.alert('Чит-код активирован! Все достижения открыты и на счёт зачислено 2 000 000 монет.');
-      evaluateAchievements();
-      renderAll();
-      saveGame();
-    }
-
-    function spawnRareCheatChip() {
-      const bonus = SMALL_CHEAT_CODES[Math.floor(Math.random() * SMALL_CHEAT_CODES.length)];
-      const ponyRect = ponyButton.getBoundingClientRect();
-      const chip = document.createElement('button');
-      chip.type = 'button';
+      playAchievementSound();
       chip.className = 'rare-cheat-chip';
       chip.innerHTML = `<span>${bonus.code}</span><small>${bonus.label}</small>`;
 
@@ -1733,6 +1817,8 @@
       const comboMultiplier = getComboMultiplier();
       const reward = Math.round(baseReward * comboMultiplier * (critical ? getCriticalMultiplier() : 1));
 
+      playClickSound(critical);
+
       state.coins += reward;
       state.totalCoins += reward;
       state.statistics.sessionCoins += reward;
@@ -1829,6 +1915,21 @@
 
               <div class="toggle-row">
                 <div class="label-wrap">
+                  <span>Автоприменение чит-кодов</span>
+                  <small>Распознавать вводимые коды автоматически</small>
+                </div>
+                <button class="toggle ${state.settings.cheatAutoApply ? 'active' : ''}" data-setting="cheatAutoApply" type="button" aria-label="Переключить автоприменение чит-кодов" aria-pressed="${state.settings.cheatAutoApply}"></button>
+              </div>
+
+              <div class="cheat-panel">
+                <div class="cheat-input-row">
+                  <input id="cheatCodeInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите чит-код..." />
+                  <button class="primary-button" id="applyCheatButton" type="button">Применить</button>
+                </div>
+              </div>
+
+              <div class="toggle-row">
+                <div class="label-wrap">
                   <span>Анимации</span>
                   <small>Летающие цифры и движение</small>
                 </div>
@@ -1880,6 +1981,31 @@
           saveGame();
         });
       }
+
+      const cheatInput = modalRoot.querySelector('#cheatCodeInput');
+      const applyCheatButton = modalRoot.querySelector('#applyCheatButton');
+      const applyCheatFromInput = () => {
+        const value = cheatInput ? cheatInput.value : '';
+        if (value) {
+          const applied = applyCheatCode(value);
+          if (applied && cheatInput) {
+            cheatInput.value = '';
+          }
+        }
+      };
+
+      if (cheatInput) {
+        cheatInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            applyCheatFromInput();
+          }
+        });
+      }
+
+      if (applyCheatButton) {
+        applyCheatButton.addEventListener('click', applyCheatFromInput);
+      }
+
       modalRoot.querySelectorAll('.toggle').forEach((toggle) => {
         toggle.addEventListener('click', () => {
           const key = toggle.dataset.setting;
@@ -1928,6 +2054,10 @@
 
       if (event.key === 'Escape' && modalRoot.innerHTML) {
         closeModal();
+      }
+
+      if (!state.settings.cheatAutoApply) {
+        return;
       }
 
       if (event.key === 'Backspace') {
