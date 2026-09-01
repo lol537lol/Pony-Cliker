@@ -1,289 +1,1524 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pony Clicker (testing)</title>
-    <style>
-        /* Основные стили */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: 'Roboto', sans-serif;
-            color: #f0f0f0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pony Clicker</title>
+  <style>
+    :root {
+      --bg: #f6eefc;
+      --bg-deep: #eadcff;
+      --panel: rgba(255, 250, 255, 0.8);
+      --panel-strong: rgba(255, 255, 255, 0.9);
+      --panel-alt: rgba(244, 237, 255, 0.86);
+      --border: rgba(126, 102, 174, 0.18);
+      --text: #2a2435;
+      --text-muted: #655a72;
+      --gold: #f1b94d;
+      --gold-strong: #e49c35;
+      --accent: #8f7ae9;
+      --accent-strong: #7257d8;
+      --success: #77c7a4;
+      --danger: #e86f8c;
+      --warning: #f3bf63;
+      --shadow: rgba(110, 81, 146, 0.18);
+      --glow: rgba(177, 152, 255, 0.28);
+      --radius: 18px;
+      --transition: 180ms ease;
+    }
 
-        .background {
-            background-image: url('images/background.jpg'); /* Фоновое изображение */
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    * { box-sizing: border-box; }
 
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.801); /* Прозрачный серый фон */
-            z-index: 1;
-        }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(202, 177, 255, 0.35), transparent 32%),
+        linear-gradient(180deg, #fdf8ff 0%, #f4ebff 38%, #f0f4ff 100%);
+      color: var(--text);
+      overflow-x: hidden;
+    }
 
-        .clicker-container {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-        }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 18px;
+    }
 
-        #clicker-button {
-            background-color: #4CAF50; /* Зеленая кнопка */
-            color: white;
-            border: none;
-            padding: 20px 40px;
-            font-size: 20px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            border-radius: 5px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.1s ease, box-shadow 0.3s ease;
-        }
+    button, input { font: inherit; }
 
-        #clicker-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.3);
-        }
+    button {
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition), border-color var(--transition);
+    }
 
-        #clicker-button:active {
-            transform: scale(0.95);
-        }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button:focus-visible, [role="button"]:focus-visible, .toggle:focus-visible {
+      outline: 2px solid rgba(140, 201, 255, 0.9);
+      outline-offset: 2px;
+    }
 
-        #clicker-button img {
-            max-width: 50px;
-            height: auto;
-        }
+    .app-shell {
+      width: min(1200px, 100%);
+      min-height: calc(100vh - 36px);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: relative;
+    }
 
-        #coin-counter {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            color: #FFD700;
-            font-size: 24px;
-            font-weight: bold;
-            transition: transform 0.3s ease;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-        }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 14px 32px var(--shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
 
-        /* Поздравительное окно */
-        #congrats-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 3;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease, visibility 0.5s;
-        }
+    .developer-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      margin-top: 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(242,232,255,0.72));
+      border: 1px solid rgba(127, 101, 180, 0.14);
+      box-shadow: 0 8px 20px rgba(118, 93, 170, 0.12);
+      color: var(--text);
+    }
 
-        .congrats-window {
-            background-color: #333;
-            padding: 30px;
-            text-align: center;
-            border-radius: 15px;
-            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
-            max-width: 500px;
-            width: 80%;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
+    .developer-card img {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.88);
+      box-shadow: 0 8px 18px rgba(120, 99, 174, 0.2);
+    }
 
-        .congrats-window.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .developer-card small {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
 
-        .congrats-window h2 {
-            font-size: 28px;
-            color: #4CAF50;
-            margin-bottom: 10px;
-            opacity: 0;
-            display: inline-block;
-            animation: typing 1s steps(10, end) forwards;
-        }
+    .developer-card strong {
+      font-size: 0.92rem;
+    }
 
-        @keyframes typing {
-            0% {
-                opacity: 0;
-                color: #4CAF50;
-            }
-            100% {
-                opacity: 1;
-                color: #f0f0f0;
-            }
-        }
+    .top-bar {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: center;
+      padding: 14px 18px;
+      gap: 12px;
+    }
 
-        .congrats-window p {
-            font-size: 18px;
-            color: #f0f0f0;
-            margin: 10px 0;
-        }
+    .hud-block {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
 
-        .congrats-window img {
-            max-width: 100%;
-            height: auto;
-            margin-top: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
-            opacity: 0;
-            transform: scale(0.8);
-            transition: opacity 0.5s ease 0.5s, transform 0.5s ease 0.5s;
-        }
+    .hud-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
 
-        .congrats-window img.show {
-            opacity: 1;
-            transform: scale(1);
-        }
+    .hud-value {
+      font-weight: 700;
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-        /* Стиль для кнопки закрытия */
-        .close-button {
-            margin-top: 20px;
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
+    .coins-value { color: var(--gold); }
+    .level-value { color: var(--accent); }
+    .multiplier-value { color: var(--success); }
 
-        .close-button:hover {
-            background-color: #e53935;
-        }
+    .xp-box {
+      min-width: 0;
+    }
 
-        /* Пасхалка */
-        .easter-egg {
-            position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 24px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
+    .xp-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
 
-        @keyframes shake {
-            0%, 100% {
-                transform: translateX(0);
-            }
-            25% {
-                transform: translateX(-5px);
-            }
-            75% {
-                transform: translateX(5px);
-            }
-        }
-    </style>
+    .xp-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .xp-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #72e2c3 0%, #7eb7ff 100%);
+      border-radius: inherit;
+      transition: width 180ms ease;
+    }
+
+    .settings-button {
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(109, 133, 255, 0.18), rgba(146, 164, 255, 0.08));
+      color: var(--text);
+      border-color: rgba(140, 201, 255, 0.32);
+      min-height: 52px;
+      font-size: 1.3rem;
+      width: 100%;
+    }
+
+    .main-stage {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr) 300px;
+      gap: 18px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .side-panel {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .panel-title {
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0 0 10px;
+    }
+
+    .center-stage {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 520px;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .center-stage::before {
+      content: "";
+      position: absolute;
+      inset: 8% 12%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(151, 168, 255, 0.18), rgba(120, 78, 198, 0.1), transparent 70%);
+      pointer-events: none;
+    }
+
+    .pony-wrap {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(100%, 480px);
+      aspect-ratio: 1;
+    }
+
+    .pony-button {
+      position: relative;
+      width: min(100%, 360px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.15), rgba(117, 149, 214, 0.03) 40%, rgba(5, 8, 15, 0.7) 70%);
+      border: 1px solid rgba(143, 170, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 28px 42px rgba(0, 0, 0, 0.28), 0 0 50px rgba(113, 157, 255, 0.18);
+      padding: 0;
+      overflow: hidden;
+      animation: floaty 4.6s ease-in-out infinite;
+    }
+
+    .pony-button::before {
+      content: "";
+      position: absolute;
+      inset: 12% 18% 16% 18%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(116, 157, 255, 0.2), transparent 65%);
+      filter: blur(12px);
+    }
+
+    .pony-button img {
+      width: 74%;
+      max-width: 280px;
+      height: auto;
+      position: relative;
+      z-index: 2;
+      user-select: none;
+      pointer-events: none;
+      filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.32));
+      transition: transform 120ms ease;
+    }
+
+    .pony-button.pressed img {
+      transform: scale(0.96) translateY(6px);
+    }
+
+    .pony-button.critical {
+      box-shadow: 0 28px 42px rgba(0, 0, 0, 0.28), 0 0 60px rgba(255, 189, 76, 0.4);
+      border-color: rgba(255, 214, 122, 0.5);
+    }
+
+    .combo-display {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--warning);
+      text-shadow: 0 0 18px rgba(255, 206, 116, 0.82);
+      min-width: 180px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .combo-display.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .floating-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .float-text {
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      transform: translate(-50%, 0);
+      font-weight: 900;
+      font-size: clamp(1rem, 2vw, 1.7rem);
+      letter-spacing: 0.04em;
+      text-shadow: 0 8px 18px rgba(0, 0, 0, 0.44);
+      animation: floatUp 1s ease forwards;
+      white-space: nowrap;
+      opacity: 0;
+    }
+
+    .float-text.critical {
+      color: var(--warning);
+    }
+
+    .float-text.combo {
+      color: var(--success);
+    }
+
+    .float-text.coin {
+      color: var(--gold);
+    }
+
+    .particles {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(151, 176, 255, 0.82);
+      animation: particleBurst 0.9s ease forwards;
+      box-shadow: 0 0 12px rgba(151, 176, 255, 0.9);
+    }
+
+    .list-block {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .upgrade-item, .achievement-item, .stat-item {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+
+    .upgrade-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .upgrade-item h4, .achievement-item h4 {
+      margin: 0 0 4px;
+      font-size: 0.95rem;
+    }
+
+    .upgrade-item p, .achievement-item p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.77rem;
+      line-height: 1.4;
+    }
+
+    .upgrade-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .cost-chip {
+      font-size: 0.74rem;
+      color: var(--gold);
+      font-weight: 700;
+      background: rgba(247, 214, 122, 0.08);
+      border: 1px solid rgba(247, 214, 122, 0.2);
+      padding: 6px 8px;
+      border-radius: 999px;
+    }
+
+    .buy-button {
+      min-width: 78px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #7ea7ff 0%, #5f7ed9 100%);
+      color: white;
+      font-weight: 700;
+      border-color: rgba(143, 170, 255, 0.5);
+    }
+
+    .buy-button.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .achievement-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      opacity: 0.7;
+      transition: opacity var(--transition), transform var(--transition), border-color var(--transition);
+    }
+
+    .achievement-item.unlocked {
+      opacity: 1;
+      border-color: rgba(159, 227, 179, 0.35);
+      background: rgba(159, 227, 179, 0.06);
+    }
+
+    .achievement-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 1.1rem;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 74px;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .stat-value {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .bottom-panels {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      gap: 18px;
+      min-height: 250px;
+    }
+
+    .bottom-panel {
+      padding: 16px;
+    }
+
+    .collection-summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .collection-pill {
+      background: rgba(124, 167, 255, 0.08);
+      border: 1px solid rgba(124, 167, 255, 0.24);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .toast-container {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 30;
+      width: min(320px, calc(100% - 32px));
+      pointer-events: none;
+    }
+
+    .toast {
+      background: rgba(19, 27, 38, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 4px solid var(--accent);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: 0 18px 30px rgba(0, 0, 0, 0.28);
+      animation: toastIn 220ms ease forwards;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .toast.success { border-left-color: var(--success); }
+    .toast.warning { border-left-color: var(--warning); }
+    .toast.critical { border-left-color: var(--gold); }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(4, 7, 12, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 40;
+      padding: 24px;
+    }
+
+    .modal-window {
+      width: min(560px, 100%);
+      max-height: min(80vh, 760px);
+      overflow: auto;
+      background: rgba(17, 22, 30, 0.96);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 26px 56px rgba(0, 0, 0, 0.38);
+      padding: 20px;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.35rem;
+    }
+
+    .dialog-close {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 1.2rem;
+    }
+
+    .setting-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+    }
+
+    .toggle-row .label-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .toggle-row span {
+      font-weight: 600;
+    }
+
+    .toggle-row small {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+    }
+
+    .toggle {
+      position: relative;
+      width: 52px;
+      height: 30px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      transition: transform var(--transition);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle.active {
+      background: linear-gradient(90deg, rgba(124, 167, 255, 0.8), rgba(134, 220, 189, 0.86));
+    }
+
+    .toggle.active::after {
+      transform: translateX(22px);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .secondary-button {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+
+    .primary-button {
+      background: linear-gradient(180deg, #8ac0ff, #5f7ed9);
+      color: white;
+      border: 1px solid rgba(124, 167, 255, 0.4);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+    }
+
+    .danger-button {
+      background: linear-gradient(180deg, #ff8a9d, #d85676);
+      color: white;
+      border: 1px solid rgba(255, 124, 141, 0.4);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+    }
+
+    .hidden { display: none !important; }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 18px) scale(0.9);
+      }
+      20% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -62px) scale(1.06);
+      }
+    }
+
+    @keyframes particleBurst {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--dx), var(--dy)) scale(0.2);
+      }
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @media (max-width: 980px) {
+      .main-stage {
+        grid-template-columns: 1fr;
+      }
+
+      .center-stage {
+        min-height: 380px;
+      }
+
+      .bottom-panels {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 12px;
+      }
+
+      .top-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .settings-button {
+        min-height: 46px;
+      }
+
+      .pony-button {
+        width: min(100%, 280px);
+      }
+
+      .stat-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="background">
-        <div class="overlay"></div>
-        <div class="clicker-container">
-            <button id="clicker-button">
-                Нажми на меня
-                <img src="images/pony.png" alt="Pony" onerror="this.onerror=null; this.src='images/default-pony.png'">
-            </button>
-            <div id="coin-counter">Монеты: 0</div>
+  <div class="app-shell">
+    <header class="top-bar panel" aria-label="Игровой заголовок">
+      <div class="hud-block">
+        <div>
+          <div class="hud-label">Монеты</div>
+          <div class="hud-value coins-value" id="coinsDisplay">0</div>
         </div>
-    </div>
+      </div>
 
-    <!-- Поздравительное окно -->
-    <div id="congrats-overlay">
-        <div class="congrats-window">
-            <h2>Поздравляем!</h2>
-            <p>Вы достигли 30 монет и прошли игру!</p>
-            <p id="countdown-timer">Закрытие через: 15 секунд</p> <!-- Таймер в поздравительном окне -->
-            <p style="font-size: 16px; color: #f0f0f0;">Спасибо за игру!!!</p> <!-- Дополнительный текст -->
-            <img src="images/congrats.png" alt="Поздравляем!" class="show" onerror="this.style.display='none'">
-            <p style="margin-top: 10px; font-size: 16px; color: #B0C4DE;">
-                Разработчик: Black Smoke
-            </p>
-            <button class="close-button">Закрыть</button>
+      <div class="hud-block">
+        <div>
+          <div class="hud-label">Уровень</div>
+          <div class="hud-value level-value" id="levelDisplay">1</div>
         </div>
+      </div>
+
+      <div class="hud-block xp-box">
+        <div class="xp-meta">
+          <span class="hud-label">Опыт</span>
+          <span id="xpText">0 / 100</span>
+        </div>
+        <div class="xp-bar" aria-label="Прогресс до следующего уровня">
+          <div class="xp-bar-fill" id="xpBarFill"></div>
+        </div>
+      </div>
+
+      <div class="hud-block">
+        <div>
+          <div class="hud-label">Множитель</div>
+          <div class="hud-value multiplier-value" id="multiplierDisplay">x1.0</div>
+        </div>
+      </div>
+
+      <button id="settingsButton" class="settings-button" type="button" aria-label="Открыть настройки">⚙</button>
+    </header>
+
+    <main class="main-stage">
+      <aside class="side-panel panel" aria-label="Панель улучшений">
+        <h2 class="panel-title">Улучшения</h2>
+        <div id="upgradesList" class="list-block" aria-live="polite"></div>
+      </aside>
+
+      <section class="center-stage panel" aria-label="Игровое поле">
+        <div id="comboDisplay" class="combo-display" aria-live="polite">Комбо x1</div>
+        <div class="pony-wrap">
+          <button id="ponyButton" class="pony-button" type="button" aria-label="Нажми на пони, чтобы заработать монеты">
+            <img src="images/pony.png" alt="Пони" onerror="this.onerror=null; this.src='images/congrats.png';" />
+          </button>
+        </div>
+        <div id="floatingLayer" class="floating-layer" aria-hidden="true"></div>
+      </section>
+
+      <aside class="side-panel panel" aria-label="Панель статистики">
+        <h2 class="panel-title">Статистика</h2>
+        <div id="statsList" class="stat-grid" aria-live="polite"></div>
+      </aside>
+    </main>
+
+    <section class="bottom-panels">
+      <div class="bottom-panel panel" aria-label="Панель достижений">
+        <div class="collection-summary">
+          <h2 class="panel-title">Достижения</h2>
+          <div id="achievementCount" class="collection-pill">0 / 0</div>
+        </div>
+        <div id="achievementsList" class="list-block" aria-live="polite"></div>
+      </div>
+
+      <div class="bottom-panel panel" aria-label="Панель коллекции">
+        <div class="collection-summary">
+          <h2 class="panel-title">Коллекция</h2>
+          <div class="collection-pill">Сокровищница пони</div>
+        </div>
+        <div class="list-block" id="collectionList"></div>
+      </div>
+    </section>
+
+    <div class="developer-card" aria-label="Разработчик игры">
+      <img src="images/congrats.png" alt="Аватар разработчика" />
+      <div>
+        <small>Разработчик</small>
+        <strong>Black Smoke</strong>
+      </div>
     </div>
+  </div>
 
-    <!-- Пасхалка -->
-    <div class="easter-egg" onclick="easterEggClick()">
-        (\ - c -
-    </div>
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <div id="modalRoot"></div>
 
-    <script>
-        let coinCount = 0;
-        const maxCoins = 30; // Увеличенный лимит монет
-        const coinCounter = document.getElementById('coin-counter');
-        const congratsOverlay = document.getElementById('congrats-overlay');
-        const closeButton = document.querySelector('.close-button');
-        const countdownTimer = document.getElementById('countdown-timer');
+  <script>
+    const STORAGE_KEY = 'pony-clicker-save-v1';
+    const COMBO_TIMEOUT_MS = 1600;
+    const AUTOSAVE_INTERVAL_MS = 5000;
+    const UPGRADE_META = {
+      clickPower: {
+        id: 'clickPower',
+        name: 'Сила клика',
+        description: 'Увеличивает базовый доход за обычный клик.',
+        baseCost: 15,
+        costMultiplier: 1.42,
+        effect: 1,
+        maxLevel: 100
+      },
+      criticalChance: {
+        id: 'criticalChance',
+        name: 'Шанс крит. удара',
+        description: 'Повышает шанс выпадения критического клика.',
+        baseCost: 30,
+        costMultiplier: 1.62,
+        effect: 0.02,
+        maxLevel: 100
+      },
+      criticalMultiplier: {
+        id: 'criticalMultiplier',
+        name: 'Множитель крит.',
+        description: 'Увеличивает награду за критические клики.',
+        baseCost: 50,
+        costMultiplier: 1.7,
+        effect: 0.4,
+        maxLevel: 100
+      },
+      comboPower: {
+        id: 'comboPower',
+        name: 'Сила комбо',
+        description: 'Усиливает бонус от серии быстрых кликов.',
+        baseCost: 45,
+        costMultiplier: 1.72,
+        effect: 0.12,
+        maxLevel: 100
+      },
+      autoClicker: {
+        id: 'autoClicker',
+        name: 'Помощник пони',
+        description: 'Автоматически приносит монеты каждую секунду.',
+        baseCost: 60,
+        costMultiplier: 1.85,
+        effect: 1,
+        maxLevel: 100
+      }
+    };
 
-        document.getElementById('clicker-button').addEventListener('click', () => {
-            coinCount++;
-            coinCounter.innerText = `Монеты: ${coinCount}`;
-            if (coinCount >= maxCoins) {
-                showCongrats();
-            }
+    const ACHIEVEMENTS = [
+      { id: 'first_coin', name: 'Первая монета', icon: '🪙', description: 'Заработай первую монету.', check: (state) => state.totalCoins >= 1 },
+      { id: 'first_click', name: 'Первый клик', icon: '✨', description: 'Нажми на пони хотя бы один раз.', check: (state) => state.statistics.totalClicks >= 1 },
+      { id: 'coin_100', name: '100 монет', icon: '💰', description: 'Накопи 100 монет.', check: (state) => state.totalCoins >= 100 },
+      { id: 'coin_1000', name: '1 000 монет', icon: '🌟', description: 'Накопи 1 000 монет.', check: (state) => state.totalCoins >= 1000 },
+      { id: 'coin_10000', name: '10 000 монет', icon: '🏆', description: 'Накопи 10 000 монет.', check: (state) => state.totalCoins >= 10000 },
+      { id: 'click_master', name: 'Мастер кликов', icon: '🖱️', description: 'Сделай 500 кликов.', check: (state) => state.statistics.totalClicks >= 500 },
+      { id: 'critical_master', name: 'Мастер критов', icon: '💥', description: 'Совершай 25 критических ударов.', check: (state) => state.statistics.criticalClicks >= 25 },
+      { id: 'combo_master', name: 'Мастер комбо', icon: '⚡', description: 'Достигни комбо 25.', check: (state) => state.statistics.maxCombo >= 25 },
+      { id: 'millionaire', name: 'Миллионер', icon: '👑', description: 'Накопи 1 000 000 монет.', check: (state) => state.totalCoins >= 1000000 },
+      { id: 'collector', name: 'Коллекционер', icon: '🧺', description: 'Разблокируй каждое достижение.', check: (state) => Object.keys(state.achievements).length >= ACHIEVEMENTS.length },
+      { id: 'easter_egg', name: 'Пасхалка', icon: '🐾', description: 'Найди скрытый секрет.', check: (state) => Boolean(state.achievements.easter_egg) }
+    ];
+
+    const defaultState = () => ({
+      saveVersion: 1,
+      coins: 0,
+      totalCoins: 0,
+      level: 1,
+      xp: 0,
+      xpRequired: 100,
+      clickPower: 1,
+      criticalChance: 0.08,
+      criticalMultiplier: 2.5,
+      combo: 0,
+      maxCombo: 0,
+      lastClickAt: 0,
+      upgrades: {
+        clickPower: 0,
+        criticalChance: 0,
+        criticalMultiplier: 0,
+        comboPower: 0,
+        autoClicker: 0
+      },
+      achievements: {},
+      statistics: {
+        totalClicks: 0,
+        totalCoins: 0,
+        sessionCoins: 0,
+        criticalClicks: 0,
+        maxCombo: 0,
+        playTime: 0,
+        totalUpgrades: 0,
+        autoIncome: 0,
+        highestLevel: 1,
+        achievementsUnlocked: 0
+      },
+      settings: {
+        sound: true,
+        animations: true,
+        particles: true,
+        reducedMotion: false,
+        autosave: true
+      }
+    });
+
+    const state = loadGame();
+    let modalState = null;
+    let lastAutosave = Date.now();
+
+    const coinDisplay = document.getElementById('coinsDisplay');
+    const levelDisplay = document.getElementById('levelDisplay');
+    const xpText = document.getElementById('xpText');
+    const xpBarFill = document.getElementById('xpBarFill');
+    const multiplierDisplay = document.getElementById('multiplierDisplay');
+    const upgradesList = document.getElementById('upgradesList');
+    const achievementsList = document.getElementById('achievementsList');
+    const achievementCount = document.getElementById('achievementCount');
+    const statsList = document.getElementById('statsList');
+    const collectionList = document.getElementById('collectionList');
+    const floatingLayer = document.getElementById('floatingLayer');
+    const comboDisplay = document.getElementById('comboDisplay');
+    const ponyButton = document.getElementById('ponyButton');
+    const settingsButton = document.getElementById('settingsButton');
+    const modalRoot = document.getElementById('modalRoot');
+    const toastContainer = document.getElementById('toastContainer');
+
+    function formatNumber(value) {
+      const absValue = Math.abs(value);
+      const units = ['', 'K', 'M', 'B', 'T'];
+      let unitIndex = 0;
+      let scaled = absValue;
+
+      while (scaled >= 1000 && unitIndex < units.length - 1) {
+        scaled /= 1000;
+        unitIndex += 1;
+      }
+
+      if (scaled >= 100) {
+        return `${scaled.toFixed(0)}${units[unitIndex]}`;
+      }
+
+      if (scaled >= 10) {
+        return `${scaled.toFixed(1).replace(/\.0$/, '')}${units[unitIndex]}`;
+      }
+
+      if (scaled >= 1) {
+        return `${scaled.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')}${units[unitIndex]}`;
+      }
+
+      return `${value.toFixed(0)}`;
+    }
+
+    function getXpRequirement(level) {
+      return Math.round(100 * Math.pow(1.54, level - 1));
+    }
+
+    function getUpgradeCost(id) {
+      const meta = UPGRADE_META[id];
+      const level = state.upgrades[id] || 0;
+      return Math.floor(meta.baseCost * Math.pow(meta.costMultiplier, level));
+    }
+
+    function getClickPower() {
+      return state.clickPower + state.upgrades.clickPower * 1.5 + state.level * 0.25;
+    }
+
+    function getCriticalChance() {
+      return Math.min(0.86, state.criticalChance + state.upgrades.criticalChance * 0.04);
+    }
+
+    function getCriticalMultiplier() {
+      return state.criticalMultiplier + state.upgrades.criticalMultiplier * 0.8;
+    }
+
+    function getComboMultiplier() {
+      const comboBonus = Math.min(state.combo, 30) * 0.06;
+      return 1 + comboBonus + state.upgrades.comboPower * 0.18;
+    }
+
+    function getAutoIncome() {
+      return state.upgrades.autoClicker * 1.2;
+    }
+
+    function loadGame() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return defaultState();
+        }
+
+        const parsed = JSON.parse(raw);
+        const fallback = defaultState();
+        const merged = { ...fallback, ...parsed, settings: { ...fallback.settings, ...(parsed.settings || {}) }, upgrades: { ...fallback.upgrades, ...(parsed.upgrades || {}) }, achievements: parsed.achievements || {}, statistics: { ...fallback.statistics, ...(parsed.statistics || {}) } };
+        if (typeof merged.coins !== 'number' || Number.isNaN(merged.coins)) merged.coins = 0;
+        if (typeof merged.totalCoins !== 'number' || Number.isNaN(merged.totalCoins)) merged.totalCoins = 0;
+        return merged;
+      } catch (error) {
+        return defaultState();
+      }
+    }
+
+    function saveGame() {
+      const payload = {
+        saveVersion: 1,
+        coins: Number(state.coins) || 0,
+        totalCoins: Number(state.totalCoins) || 0,
+        level: Number(state.level) || 1,
+        xp: Number(state.xp) || 0,
+        xpRequired: Number(state.xpRequired) || 100,
+        clickPower: Number(state.clickPower) || 1,
+        criticalChance: Number(state.criticalChance) || 0.08,
+        criticalMultiplier: Number(state.criticalMultiplier) || 2.5,
+        combo: Number(state.combo) || 0,
+        maxCombo: Number(state.maxCombo) || 0,
+        lastClickAt: Number(state.lastClickAt) || 0,
+        upgrades: { ...state.upgrades },
+        achievements: { ...state.achievements },
+        statistics: { ...state.statistics },
+        settings: { ...state.settings }
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }
+
+    function showToast(message, type = 'success') {
+      if (!state.settings.animations) return;
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      toastContainer.appendChild(toast);
+      window.setTimeout(() => {
+        toast.remove();
+      }, 2600);
+    }
+
+    function renderHUD() {
+      coinDisplay.textContent = formatNumber(state.coins);
+      levelDisplay.textContent = String(state.level);
+      const xpPercent = Math.min(100, (state.xp / state.xpRequired) * 100);
+      xpText.textContent = `${formatNumber(state.xp)} / ${formatNumber(state.xpRequired)}`;
+      xpBarFill.style.width = `${xpPercent}%`;
+      multiplierDisplay.textContent = `x${(getComboMultiplier() * (state.clickPower / 1)).toFixed(1)}`;
+    }
+
+    function renderUpgrades() {
+      const html = Object.values(UPGRADE_META).map((meta) => {
+        const level = state.upgrades[meta.id] || 0;
+        const cost = getUpgradeCost(meta.id);
+        const affordable = state.coins >= cost;
+        return `
+          <div class="upgrade-item">
+            <div>
+              <h4>${meta.name} Ур.${level}</h4>
+              <p>${meta.description}</p>
+            </div>
+            <div class="upgrade-controls">
+              <div class="cost-chip">${formatNumber(cost)} мон.</div>
+              <button class="buy-button ${affordable ? '' : 'disabled'}" data-upgrade="${meta.id}" type="button" ${affordable ? '' : 'disabled'}>
+                Купить
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      upgradesList.innerHTML = html;
+      upgradesList.querySelectorAll('[data-upgrade]').forEach((button) => {
+        button.addEventListener('click', () => purchaseUpgrade(button.dataset.upgrade));
+      });
+    }
+
+    function renderAchievements() {
+      const total = ACHIEVEMENTS.length;
+      const unlocked = Object.keys(state.achievements).length;
+      achievementCount.textContent = `${unlocked} / ${total}`;
+
+      const html = ACHIEVEMENTS.map((achievement) => {
+        const isUnlocked = Boolean(state.achievements[achievement.id]);
+        return `
+          <div class="achievement-item ${isUnlocked ? 'unlocked' : ''}">
+            <div class="achievement-icon">${achievement.icon}</div>
+            <div>
+              <h4>${achievement.name}</h4>
+              <p>${achievement.description}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      achievementsList.innerHTML = html;
+    }
+
+    function renderStats() {
+      const stats = [
+        ['Клики', formatNumber(state.statistics.totalClicks)],
+        ['Криты', formatNumber(state.statistics.criticalClicks)],
+        ['Макс. комбо', String(state.statistics.maxCombo)],
+        ['Авто / сек', formatNumber(getAutoIncome())],
+        ['Время', `${Math.floor(state.statistics.playTime / 60)}м`],
+        ['Макс. уровень', String(state.statistics.highestLevel)]
+      ];
+
+      statsList.innerHTML = stats.map(([label, value]) => `
+        <div class="stat-item">
+          <div class="stat-label">${label}</div>
+          <div class="stat-value">${value}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderCollection() {
+      const collection = [
+        { label: 'Помощник пони', value: `Ур.${state.upgrades.autoClicker}` },
+        { label: 'Шанс критов', value: `${(getCriticalChance() * 100).toFixed(1)}%` },
+        { label: 'Комбо', value: `x${getComboMultiplier().toFixed(1)}` },
+        { label: 'Прогресс', value: `${Math.min(100, Math.round((Object.keys(state.achievements).length / ACHIEVEMENTS.length) * 100))}%` }
+      ];
+
+      collectionList.innerHTML = collection.map((item) => `
+        <div class="achievement-item">
+          <div class="achievement-icon">✨</div>
+          <div>
+            <h4>${item.label}</h4>
+            <p>${item.value}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderAll() {
+      renderHUD();
+      renderUpgrades();
+      renderAchievements();
+      renderStats();
+      renderCollection();
+      updateComboDisplay();
+    }
+
+    function updateComboDisplay() {
+      if (state.combo > 0) {
+        comboDisplay.textContent = `Combo x${state.combo}`;
+        comboDisplay.classList.add('visible');
+      } else {
+        comboDisplay.classList.remove('visible');
+      }
+    }
+
+    function purchaseUpgrade(id) {
+      const meta = UPGRADE_META[id];
+      const level = state.upgrades[id] || 0;
+      if (level >= meta.maxLevel) return;
+      const cost = getUpgradeCost(id);
+      if (state.coins < cost) {
+        showToast('Недостаточно монет', 'warning');
+        return;
+      }
+
+      state.coins -= cost;
+      state.upgrades[id] += 1;
+      state.statistics.totalUpgrades += 1;
+      state.statistics.autoIncome = getAutoIncome();
+      if (id === 'clickPower') {
+        state.clickPower += meta.effect;
+      }
+      if (id === 'criticalChance') {
+        state.criticalChance += meta.effect;
+      }
+      if (id === 'criticalMultiplier') {
+        state.criticalMultiplier += meta.effect;
+      }
+      if (id === 'comboPower') {
+        state.combo += 0;
+      }
+      showToast(`${meta.name} улучшено`, 'success');
+      evaluateAchievements();
+      renderAll();
+      saveGame();
+    }
+
+    function awardXp(amount) {
+      state.xp += amount;
+      while (state.xp >= state.xpRequired) {
+        state.xp -= state.xpRequired;
+        state.level += 1;
+        state.xpRequired = getXpRequirement(state.level);
+        state.statistics.highestLevel = Math.max(state.statistics.highestLevel, state.level);
+        showToast(`Уровень повышен! Теперь ${state.level} уровень`, 'critical');
+      }
+      state.xp = Math.max(0, state.xp);
+      state.xpRequired = Math.max(10, state.xpRequired);
+    }
+
+    function createFloatingText(text, type = 'coin', x = 50, y = 54) {
+      if (!state.settings.animations && !state.settings.particles) return;
+      const el = document.createElement('div');
+      el.className = `float-text ${type}`;
+      el.textContent = text;
+      el.style.left = `${x}%`;
+      el.style.top = `${y}%`;
+      floatingLayer.appendChild(el);
+      window.setTimeout(() => el.remove(), 1000);
+    }
+
+    function createBurstParticles() {
+      if (!state.settings.particles) return;
+      const count = 14;
+      for (let i = 0; i < count; i += 1) {
+        const particle = document.createElement('div');
+        particle.className = 'particles';
+        const size = 6 + Math.random() * 8;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = '50%';
+        particle.style.top = '50%';
+        particle.style.setProperty('--dx', `${(Math.random() - 0.5) * 140}px`);
+        particle.style.setProperty('--dy', `${(-80 - Math.random() * 100)}px`);
+        particle.style.background = i % 2 === 0 ? 'rgba(255, 200, 100, 0.9)' : 'rgba(148, 160, 255, 0.9)';
+        floatingLayer.appendChild(particle);
+        window.setTimeout(() => particle.remove(), 920);
+      }
+    }
+
+    function evaluateAchievements() {
+      let unlockedCount = 0;
+      ACHIEVEMENTS.forEach((achievement) => {
+        if (state.achievements[achievement.id]) {
+          unlockedCount += 1;
+          return;
+        }
+        if (achievement.check(state)) {
+          state.achievements[achievement.id] = { unlockedAt: Date.now() };
+          unlockedCount += 1;
+          showToast(`Достижение: ${achievement.name}`, 'success');
+        }
+      });
+      state.statistics.achievementsUnlocked = unlockedCount;
+      renderAchievements();
+      renderCollection();
+    }
+
+    function handlePonyClick() {
+      const now = Date.now();
+      state.statistics.totalClicks += 1;
+      state.lastClickAt = now;
+      state.combo = now - state.lastClickAt <= COMBO_TIMEOUT_MS && state.combo > 0 ? state.combo + 1 : 1;
+      state.maxCombo = Math.max(state.maxCombo, state.combo);
+      state.statistics.maxCombo = Math.max(state.statistics.maxCombo, state.combo);
+
+      const critical = Math.random() < getCriticalChance();
+      const baseReward = Math.max(1, getClickPower());
+      const comboMultiplier = getComboMultiplier();
+      const reward = Math.round(baseReward * comboMultiplier * (critical ? getCriticalMultiplier() : 1));
+
+      state.coins += reward;
+      state.totalCoins += reward;
+      state.statistics.sessionCoins += reward;
+      state.statistics.totalCoins += reward;
+      state.statistics.criticalClicks += critical ? 1 : 0;
+      awardXp(reward * 0.75 + (critical ? 12 : 0));
+
+      if (critical) {
+        createBurstParticles();
+        createFloatingText(`КРИТ +${formatNumber(reward)}`, 'critical', 50, 50);
+        ponyButton.classList.add('critical');
+        window.setTimeout(() => ponyButton.classList.remove('critical'), 180);
+      } else {
+        createFloatingText(`+${formatNumber(reward)}`, 'coin', 50, 50);
+      }
+
+      if (state.combo > 1) {
+        createFloatingText(`КОМБО x${state.combo}`, 'combo', 50, 38);
+      }
+
+      ponyButton.classList.add('pressed');
+      window.setTimeout(() => ponyButton.classList.remove('pressed'), 120);
+      evaluateAchievements();
+      renderAll();
+      saveGame();
+    }
+
+    function gameLoop() {
+      const now = Date.now();
+      const autoIncome = getAutoIncome();
+
+      if (autoIncome > 0) {
+        const gain = autoIncome / 10;
+        state.coins += gain;
+        state.totalCoins += gain;
+        state.statistics.sessionCoins += gain;
+        state.statistics.totalCoins += gain;
+      }
+
+      if (state.combo > 0 && now - state.lastClickAt > COMBO_TIMEOUT_MS) {
+        state.combo = Math.max(0, state.combo - 1);
+        if (state.combo === 0) {
+          state.lastClickAt = 0;
+        }
+      }
+
+      state.statistics.playTime += 0.1;
+      state.statistics.autoIncome = autoIncome;
+      state.statistics.highestLevel = Math.max(state.statistics.highestLevel, state.level);
+
+      if (state.settings.autosave && now - lastAutosave > AUTOSAVE_INTERVAL_MS) {
+        saveGame();
+        lastAutosave = now;
+      }
+
+      renderAll();
+    }
+
+    function openSettingsModal() {
+      modalState = {
+        type: 'settings'
+      };
+
+      modalRoot.innerHTML = `
+        <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+          <div class="modal-window">
+            <div class="modal-header">
+              <h3 id="settings-title">Настройки</h3>
+              <button class="dialog-close" type="button" aria-label="Закрыть настройки">×</button>
+            </div>
+
+            <div class="setting-list">
+              <div class="toggle-row">
+                <div class="label-wrap">
+                  <span>Звук</span>
+                  <small>Включить звуковые эффекты</small>
+                </div>
+                <button class="toggle ${state.settings.sound ? 'active' : ''}" data-setting="sound" type="button" aria-label="Переключить звук" aria-pressed="${state.settings.sound}"></button>
+              </div>
+
+              <div class="toggle-row">
+                <div class="label-wrap">
+                  <span>Анимации</span>
+                  <small>Летающие цифры и движение</small>
+                </div>
+                <button class="toggle ${state.settings.animations ? 'active' : ''}" data-setting="animations" type="button" aria-label="Переключить анимации" aria-pressed="${state.settings.animations}"></button>
+              </div>
+
+              <div class="toggle-row">
+                <div class="label-wrap">
+                  <span>Частицы</span>
+                  <small>Показывать эффект всплеска</small>
+                </div>
+                <button class="toggle ${state.settings.particles ? 'active' : ''}" data-setting="particles" type="button" aria-label="Переключить частицы" aria-pressed="${state.settings.particles}"></button>
+              </div>
+
+              <div class="toggle-row">
+                <div class="label-wrap">
+                  <span>Уменьшить движение</span>
+                  <small>Минимизировать визуальный шум</small>
+                </div>
+                <button class="toggle ${state.settings.reducedMotion ? 'active' : ''}" data-setting="reducedMotion" type="button" aria-label="Переключить уменьшение движения" aria-pressed="${state.settings.reducedMotion}"></button>
+              </div>
+
+              <div class="toggle-row">
+                <div class="label-wrap">
+                  <span>Автосохранение</span>
+                  <small>Автоматически сохранять прогресс</small>
+                </div>
+                <button class="toggle ${state.settings.autosave ? 'active' : ''}" data-setting="autosave" type="button" aria-label="Переключить автосохранение" aria-pressed="${state.settings.autosave}"></button>
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button class="secondary-button" id="closeModalButton" type="button">Закрыть</button>
+              <button class="danger-button" id="resetProgressButton" type="button">Сбросить прогресс</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      modalRoot.querySelector('.dialog-close').addEventListener('click', closeModal);
+      modalRoot.querySelector('#closeModalButton').addEventListener('click', closeModal);
+      modalRoot.querySelector('#resetProgressButton').addEventListener('click', resetProgress);
+      modalRoot.querySelectorAll('.toggle').forEach((toggle) => {
+        toggle.addEventListener('click', () => {
+          const key = toggle.dataset.setting;
+          if (!key) return;
+          state.settings[key] = !state.settings[key];
+          if (key === 'reducedMotion') {
+            document.body.style.setProperty('scroll-behavior', state.settings.reducedMotion ? 'auto' : 'smooth');
+          }
+          openSettingsModal();
+          saveGame();
         });
+      });
 
-        function showCongrats() {
-            congratsOverlay.style.visibility = 'visible';
-            congratsOverlay.style.opacity = '1';
-            const congratsWindow = document.querySelector('.congrats-window');
-            congratsWindow.classList.add('show');
+      modalRoot.querySelector('.modal-overlay').addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) closeModal();
+      });
+    }
 
-            // Таймер обратного отсчёта
-            let countdownValue = 15;
-            countdownTimer.innerText = `Закрытие через: ${countdownValue} секунд`;
-            const countdownInterval = setInterval(() => {
-                countdownTimer.innerText = `Закрытие через: ${countdownValue--} секунд`;
-                if (countdownValue < 0) {
-                    clearInterval(countdownInterval);
-                    closePage(); // Закрытие страницы
-                }
-            }, 1000);
-        }
+    function closeModal() {
+      modalRoot.innerHTML = '';
+      modalState = null;
+    }
 
-        function closePage() {
-            window.close(); // Закрытие страницы
-        }
+    function resetProgress() {
+      const confirmed = window.confirm('Сбросить весь прогресс игры?');
+      if (!confirmed) return;
+      const fresh = defaultState();
+      Object.assign(state, fresh);
+      localStorage.removeItem(STORAGE_KEY);
+      saveGame();
+      renderAll();
+      closeModal();
+      showToast('Прогресс сброшен', 'warning');
+    }
 
-        closeButton.addEventListener('click', () => {
-            congratsOverlay.style.opacity = '0';
-            congratsOverlay.style.visibility = 'hidden';
-            const congratsWindow = document.querySelector('.congrats-window');
-            congratsWindow.classList.remove('show');
-        });
+    function handleKeydown(event) {
+      if (event.key === 'Escape' && modalRoot.innerHTML) {
+        closeModal();
+      }
+    }
 
-        function easterEggClick() {
-            const egg = document.querySelector('.easter-egg');
-            egg.style.animation = 'shake 0.5s';
-            setTimeout(() => {
-                egg.style.animation = ''; // Сброс анимации
-            }, 500);
-            alert('Вы нашли пасхалку!'); // Уведомление о пасхалке
-        }
-    </script>
+    ponyButton.addEventListener('click', handlePonyClick);
+    settingsButton.addEventListener('click', openSettingsModal);
+    document.addEventListener('keydown', handleKeydown);
+
+    window.addEventListener('beforeunload', saveGame);
+    window.addEventListener('unload', saveGame);
+
+    const easterTarget = document.createElement('button');
+    easterTarget.type = 'button';
+    easterTarget.textContent = '✦';
+    easterTarget.setAttribute('aria-label', 'Скрытый секрет пони');
+    easterTarget.style.position = 'fixed';
+    easterTarget.style.right = '22px';
+    easterTarget.style.bottom = '22px';
+    easterTarget.style.zIndex = '25';
+    easterTarget.style.background = 'rgba(255,255,255,0.16)';
+    easterTarget.style.color = '#d99446';
+    easterTarget.style.border = '1px solid rgba(126, 102, 174, 0.18)';
+    easterTarget.style.borderRadius = '50%';
+    easterTarget.style.width = '42px';
+    easterTarget.style.height = '42px';
+    easterTarget.style.fontSize = '1.2rem';
+    easterTarget.style.boxShadow = '0 18px 34px rgba(0,0,0,0.12)';
+    easterTarget.addEventListener('click', () => {
+      if (state.achievements.easter_egg) {
+        showToast('Секрет уже найден', 'warning');
+        return;
+      }
+      state.achievements.easter_egg = { unlockedAt: Date.now() };
+      showToast('Пасхалка найдена!', 'critical');
+      evaluateAchievements();
+      renderAll();
+      saveGame();
+    });
+    document.body.appendChild(easterTarget);
+
+    renderAll();
+    setInterval(gameLoop, 100);
+  </script>
 </body>
 </html>
+

@@ -1,0 +1,142 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 7, 12, 0.7);
+  backdrop-filter: blur(6px);
+  z-index: 40;
+  padding: 24px;
+}
+
+.modal-window {
+  width: min(560px, 100%);
+  max-height: min(80vh, 760px);
+  overflow: auto;
+  background: rgba(17, 22, 30, 0.96);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 26px 56px rgba(0, 0, 0, 0.38);
+  padding: 20px;
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.dialog-close {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-size: 1.2rem;
+}
+
+.setting-list {
+  display: grid;
+  gap: 12px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}
+
+.toggle-row .label-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toggle-row span {
+  font-weight: 600;
+}
+
+.toggle-row small {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.toggle {
+  position: relative;
+  width: 52px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  transition: transform var(--transition);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.toggle.active {
+  background: linear-gradient(90deg, rgba(124, 167, 255, 0.8), rgba(134, 220, 189, 0.86));
+}
+
+.toggle.active::after {
+  transform: translateX(22px);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.secondary-button {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.primary-button {
+  background: linear-gradient(180deg, #8ac0ff, #5f7ed9);
+  color: white;
+  border: 1px solid rgba(124, 167, 255, 0.4);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.danger-button {
+  background: linear-gradient(180deg, #ff8a9d, #d85676);
+  color: white;
+  border: 1px solid rgba(255, 124, 141, 0.4);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
