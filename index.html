@@ -23,8 +23,38 @@
       --warning: #f3bf63;
       --shadow: rgba(110, 81, 146, 0.18);
       --glow: rgba(177, 152, 255, 0.28);
+      --overlay: rgba(110, 98, 143, 0.18);
+      --toast-bg: rgba(255, 255, 255, 0.92);
+      --modal-bg: rgba(255, 255, 255, 0.9);
+      --toggle-row-bg: rgba(147, 128, 194, 0.04);
+      --toggle-track: rgba(164, 153, 196, 0.18);
       --radius: 18px;
       --transition: 180ms ease;
+    }
+
+    body[data-theme="dark"] {
+      --bg: #120f1a;
+      --bg-deep: #1a1523;
+      --panel: rgba(23, 20, 31, 0.86);
+      --panel-strong: rgba(34, 30, 45, 0.92);
+      --panel-alt: rgba(28, 25, 37, 0.9);
+      --border: rgba(164, 147, 214, 0.2);
+      --text: #f2ecff;
+      --text-muted: #c8c0d9;
+      --gold: #f7c96d;
+      --gold-strong: #e5ae52;
+      --accent: #9a8dff;
+      --accent-strong: #7d63ec;
+      --success: #7bd0a8;
+      --danger: #ff86a5;
+      --warning: #f4c363;
+      --shadow: rgba(0, 0, 0, 0.45);
+      --glow: rgba(129, 112, 212, 0.26);
+      --overlay: rgba(10, 8, 14, 0.58);
+      --toast-bg: rgba(28, 24, 37, 0.95);
+      --modal-bg: rgba(24, 20, 31, 0.96);
+      --toggle-row-bg: rgba(255, 255, 255, 0.04);
+      --toggle-track: rgba(255, 255, 255, 0.1);
     }
 
     * { box-sizing: border-box; }
@@ -38,6 +68,13 @@
         linear-gradient(180deg, #fdf8ff 0%, #f4ebff 38%, #f0f4ff 100%);
       color: var(--text);
       overflow-x: hidden;
+      transition: background 180ms ease, color 180ms ease;
+    }
+
+    body[data-theme="dark"] {
+      background:
+        radial-gradient(circle at top, rgba(90, 71, 138, 0.48), transparent 30%),
+        linear-gradient(180deg, #0d0c14 0%, #151321 35%, #1a1a27 100%);
     }
 
     body {
@@ -522,16 +559,17 @@
     }
 
     .toast {
-      background: rgba(19, 27, 38, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--toast-bg);
+      border: 1px solid rgba(160, 142, 205, 0.2);
       border-left: 4px solid var(--accent);
       color: var(--text);
       border-radius: 12px;
       padding: 12px 14px;
-      box-shadow: 0 18px 30px rgba(0, 0, 0, 0.28);
+      box-shadow: 0 16px 30px var(--shadow);
       animation: toastIn 220ms ease forwards;
       opacity: 0;
       transform: translateY(8px);
+      backdrop-filter: blur(10px);
     }
 
     .toast.success { border-left-color: var(--success); }
@@ -544,8 +582,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(4, 7, 12, 0.7);
-      backdrop-filter: blur(6px);
+      background: var(--overlay);
+      backdrop-filter: blur(10px);
       z-index: 40;
       padding: 24px;
     }
@@ -554,12 +592,52 @@
       width: min(560px, 100%);
       max-height: min(80vh, 760px);
       overflow: auto;
-      background: rgba(17, 22, 30, 0.96);
+      background: var(--modal-bg);
       border: 1px solid var(--border);
       border-radius: 24px;
-      box-shadow: 0 26px 56px rgba(0, 0, 0, 0.38);
+      box-shadow: 0 26px 56px var(--shadow);
       padding: 20px;
       position: relative;
+      color: var(--text);
+    }
+
+    .custom-modal {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--overlay);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+      padding: 24px;
+    }
+
+    .custom-modal-card {
+      width: min(420px, 100%);
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 24px 60px var(--shadow);
+      padding: 22px 20px 18px;
+      color: var(--text);
+    }
+
+    .custom-modal-card h3 {
+      margin: 0 0 10px;
+      font-size: 1.25rem;
+    }
+
+    .custom-modal-card p {
+      margin: 0 0 18px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .custom-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
     }
 
     .modal-header {
@@ -579,7 +657,7 @@
       width: 38px;
       height: 38px;
       border-radius: 12px;
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(144, 138, 190, 0.08);
       color: var(--text);
       border: 1px solid var(--border);
       font-size: 1.2rem;
@@ -596,8 +674,8 @@
       justify-content: space-between;
       gap: 14px;
       padding: 12px 14px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--toggle-row-bg);
+      border: 1px solid var(--border);
       border-radius: 14px;
     }
 
@@ -621,8 +699,8 @@
       width: 52px;
       height: 30px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--toggle-track);
+      border: 1px solid var(--border);
       padding: 0;
       flex-shrink: 0;
     }
@@ -646,6 +724,16 @@
 
     .toggle.active::after {
       transform: translateX(22px);
+    }
+
+    .theme-toggle {
+      min-width: 90px;
+      background: rgba(125, 110, 190, 0.12);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-weight: 700;
     }
 
     .modal-actions {
@@ -804,6 +892,7 @@
         </div>
       </div>
 
+      <button id="themeToggleButton" class="theme-toggle" type="button" aria-label="Переключить тему">Светлая</button>
       <button id="settingsButton" class="settings-button" type="button" aria-label="Открыть настройки">⚙</button>
     </header>
 
@@ -817,7 +906,7 @@
         <div id="comboDisplay" class="combo-display" aria-live="polite">Комбо x1</div>
         <div class="pony-wrap">
           <button id="ponyButton" class="pony-button" type="button" aria-label="Нажми на пони, чтобы заработать монеты">
-            <img src="images/pony.png" alt="Пони" onerror="this.onerror=null; this.src='images/congrats.png';" />
+            <img src="images/pony.png?v=2026-09-01-1" alt="Пони" onerror="this.onerror=null; this.src='images/congrats.png?v=2026-09-01-1';" />
           </button>
         </div>
         <div id="floatingLayer" class="floating-layer" aria-hidden="true"></div>
@@ -848,7 +937,7 @@
     </section>
 
     <div class="developer-card" aria-label="Разработчик игры">
-      <img src="images/congrats.png" alt="Аватар разработчика" />
+      <img src="images/congrats.png?v=2026-09-01-1" alt="Аватар разработчика" />
       <div>
         <small>Разработчик</small>
         <strong>Black Smoke</strong>
@@ -963,7 +1052,8 @@
         animations: true,
         particles: true,
         reducedMotion: false,
-        autosave: true
+        autosave: true,
+        theme: 'light'
       }
     });
 
@@ -1097,6 +1187,63 @@
       }, 2600);
     }
 
+    function showCustomConfirm({ title, message, confirmText = 'Подтвердить', cancelText = 'Отмена', onConfirm, onCancel }) {
+      const overlay = document.createElement('div');
+      overlay.className = 'custom-modal';
+      overlay.innerHTML = `
+        <div class="custom-modal-card" role="dialog" aria-modal="true">
+          <h3>${title}</h3>
+          <p>${message}</p>
+          <div class="custom-modal-actions">
+            <button type="button" class="secondary-button" data-action="cancel">${cancelText}</button>
+            <button type="button" class="danger-button" data-action="confirm">${confirmText}</button>
+          </div>
+        </div>
+      `;
+
+      const cancelButton = overlay.querySelector('[data-action="cancel"]');
+      const confirmButton = overlay.querySelector('[data-action="confirm"]');
+
+      cancelButton.addEventListener('click', () => {
+        overlay.remove();
+        if (typeof onCancel === 'function') onCancel();
+      });
+
+      confirmButton.addEventListener('click', () => {
+        overlay.remove();
+        if (typeof onConfirm === 'function') onConfirm();
+      });
+
+      overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+          overlay.remove();
+          if (typeof onCancel === 'function') onCancel();
+        }
+      });
+
+      document.body.appendChild(overlay);
+    }
+
+    function applyTheme(theme) {
+      const nextTheme = theme === 'dark' ? 'dark' : 'light';
+      document.body.dataset.theme = nextTheme;
+      state.settings.theme = nextTheme;
+
+      const headerThemeButton = document.getElementById('themeToggleButton');
+      if (headerThemeButton) {
+        headerThemeButton.textContent = nextTheme === 'dark' ? 'Тёмная' : 'Светлая';
+        headerThemeButton.setAttribute('aria-pressed', String(nextTheme === 'dark'));
+      }
+
+      if (modalRoot) {
+        const themeButton = modalRoot.querySelector('[data-theme-toggle]');
+        if (themeButton) {
+          themeButton.textContent = nextTheme === 'dark' ? 'Тёмная' : 'Светлая';
+          themeButton.setAttribute('aria-pressed', String(nextTheme === 'dark'));
+        }
+      }
+    }
+
     function renderHUD() {
       coinDisplay.textContent = formatNumber(state.coins);
       levelDisplay.textContent = String(state.level);
@@ -1200,6 +1347,22 @@
       updateComboDisplay();
     }
 
+    function renderLiveHud() {
+      renderHUD();
+      renderStats();
+      renderCollection();
+      updateComboDisplay();
+    }
+
+    function refreshUpgradeState() {
+      renderHUD();
+      renderUpgrades();
+      renderAchievements();
+      renderStats();
+      renderCollection();
+      updateComboDisplay();
+    }
+
     function updateComboDisplay() {
       if (state.combo > 0) {
         comboDisplay.textContent = `Combo x${state.combo}`;
@@ -1237,7 +1400,7 @@
       }
       showToast(`${meta.name} улучшено`, 'success');
       evaluateAchievements();
-      renderAll();
+      refreshUpgradeState();
       saveGame();
     }
 
@@ -1304,9 +1467,12 @@
 
     function handlePonyClick() {
       const now = Date.now();
+      const previousClickAt = state.lastClickAt || 0;
+      const isComboWindow = now - previousClickAt <= COMBO_TIMEOUT_MS && state.combo > 0;
+
       state.statistics.totalClicks += 1;
+      state.combo = isComboWindow ? state.combo + 1 : 1;
       state.lastClickAt = now;
-      state.combo = now - state.lastClickAt <= COMBO_TIMEOUT_MS && state.combo > 0 ? state.combo + 1 : 1;
       state.maxCombo = Math.max(state.maxCombo, state.combo);
       state.statistics.maxCombo = Math.max(state.statistics.maxCombo, state.combo);
 
@@ -1338,7 +1504,7 @@
       ponyButton.classList.add('pressed');
       window.setTimeout(() => ponyButton.classList.remove('pressed'), 120);
       evaluateAchievements();
-      renderAll();
+      renderLiveHud();
       saveGame();
     }
 
@@ -1370,7 +1536,7 @@
         lastAutosave = now;
       }
 
-      renderAll();
+      renderLiveHud();
     }
 
     function openSettingsModal() {
@@ -1387,6 +1553,16 @@
             </div>
 
             <div class="setting-list">
+              <div class="toggle-row">
+                <div class="label-wrap">
+                  <span>Тема</span>
+                  <small>Светлая / тёмная</small>
+                </div>
+                <button class="theme-toggle" data-theme-toggle type="button" aria-label="Переключить тему" aria-pressed="${state.settings.theme === 'dark'}">
+                  ${state.settings.theme === 'dark' ? 'Тёмная' : 'Светлая'}
+                </button>
+              </div>
+
               <div class="toggle-row">
                 <div class="label-wrap">
                   <span>Звук</span>
@@ -1439,6 +1615,15 @@
       modalRoot.querySelector('.dialog-close').addEventListener('click', closeModal);
       modalRoot.querySelector('#closeModalButton').addEventListener('click', closeModal);
       modalRoot.querySelector('#resetProgressButton').addEventListener('click', resetProgress);
+      const themeToggle = modalRoot.querySelector('[data-theme-toggle]');
+      if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+          const nextTheme = state.settings.theme === 'dark' ? 'light' : 'dark';
+          applyTheme(nextTheme);
+          openSettingsModal();
+          saveGame();
+        });
+      }
       modalRoot.querySelectorAll('.toggle').forEach((toggle) => {
         toggle.addEventListener('click', () => {
           const key = toggle.dataset.setting;
@@ -1463,15 +1648,20 @@
     }
 
     function resetProgress() {
-      const confirmed = window.confirm('Сбросить весь прогресс игры?');
-      if (!confirmed) return;
-      const fresh = defaultState();
-      Object.assign(state, fresh);
-      localStorage.removeItem(STORAGE_KEY);
-      saveGame();
-      renderAll();
-      closeModal();
-      showToast('Прогресс сброшен', 'warning');
+      showCustomConfirm({
+        title: 'Сброс прогресса',
+        message: 'Точно хотите удалить весь прогресс и начать заново?',
+        confirmText: 'Сбросить',
+        onConfirm: () => {
+          const fresh = defaultState();
+          Object.assign(state, fresh);
+          localStorage.removeItem(STORAGE_KEY);
+          saveGame();
+          renderAll();
+          closeModal();
+          showToast('Прогресс сброшен', 'warning');
+        }
+      });
     }
 
     function handleKeydown(event) {
@@ -1480,8 +1670,14 @@
       }
     }
 
+    applyTheme(state.settings.theme || 'light');
+
     ponyButton.addEventListener('click', handlePonyClick);
     settingsButton.addEventListener('click', openSettingsModal);
+    document.getElementById('themeToggleButton').addEventListener('click', () => {
+      applyTheme(state.settings.theme === 'dark' ? 'light' : 'dark');
+      saveGame();
+    });
     document.addEventListener('keydown', handleKeydown);
 
     window.addEventListener('beforeunload', saveGame);
