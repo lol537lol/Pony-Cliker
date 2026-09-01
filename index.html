@@ -129,6 +129,21 @@
       border: 1px solid rgba(127, 101, 180, 0.14);
       box-shadow: 0 8px 20px rgba(118, 93, 170, 0.12);
       color: var(--text);
+      text-align: left;
+      width: 100%;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    }
+
+    body[data-theme="dark"] .developer-card {
+      background: linear-gradient(135deg, rgba(33, 27, 42, 0.92), rgba(20, 18, 28, 0.95));
+      border-color: rgba(164, 147, 214, 0.2);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    .developer-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(118, 93, 170, 0.16);
     }
 
     .developer-card img {
@@ -150,6 +165,74 @@
 
     .developer-card strong {
       font-size: 0.92rem;
+    }
+
+    .developer-profile {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .developer-profile img {
+      width: 62px;
+      height: 62px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(108, 85, 150, 0.18);
+    }
+
+    .developer-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .developer-role {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      margin-top: 4px;
+    }
+
+    .developer-story {
+      color: var(--text);
+      line-height: 1.7;
+      display: grid;
+      gap: 12px;
+      margin: 10px 0 18px;
+    }
+
+    .developer-story p {
+      margin: 0;
+    }
+
+    .developer-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .developer-meta div {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(131, 109, 192, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .developer-meta span {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .developer-meta strong {
+      font-size: 0.96rem;
     }
 
     .top-bar {
@@ -936,13 +1019,13 @@
       </div>
     </section>
 
-    <div class="developer-card" aria-label="Разработчик игры">
+    <button id="developerCard" class="developer-card" type="button" aria-label="Открыть информацию о разработчике">
       <img src="images/congrats.png?v=2026-09-01-1" alt="Аватар разработчика" />
       <div>
         <small>Разработчик</small>
         <strong>Black Smoke</strong>
       </div>
-    </div>
+    </button>
   </div>
 
   <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
@@ -1222,6 +1305,63 @@
       });
 
       document.body.appendChild(overlay);
+    }
+
+    function openDeveloperModal() {
+      modalRoot.innerHTML = `
+        <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="developer-title">
+          <div class="modal-window developer-modal-window">
+            <div class="modal-header">
+              <h3 id="developer-title">О разработчике</h3>
+              <button class="dialog-close" type="button" aria-label="Закрыть окно разработчика">×</button>
+            </div>
+
+            <div class="developer-profile">
+              <img src="images/congrats.png?v=2026-09-01-1" alt="Black Smoke" />
+              <div>
+                <div class="developer-name">Black Smoke</div>
+                <div class="developer-role">Автор, дизайнер и программист Pony Clicker</div>
+              </div>
+            </div>
+
+            <div class="developer-story">
+              <p>
+                Эта игра была заброшена на <strong>два года</strong> — почти как забытая идея,
+                которую оставили в тени, но не забыли совсем.
+              </p>
+              <p>
+                И вот, <strong>1 сентября</strong>, всё снова ожило: новый взгляд, свежий интерфейс,
+                переработанная механика и новая жизнь для проекта.
+              </p>
+              <p>
+                Pony Clicker — это не просто кликер, а возвращение идеи, которая давно ждала второго шанса.
+                Здесь есть прогресс, улучшения, достижения, атмосфера и небольшая магия, в которую хочется
+                играть снова и снова.
+              </p>
+            </div>
+
+            <div class="developer-meta">
+              <div><span>Период паузы</span><strong>2 года</strong></div>
+              <div><span>Возвращение</span><strong>1 сентября</strong></div>
+              <div><span>Стиль</span><strong>Incremental / clicker</strong></div>
+            </div>
+
+            <div class="modal-actions">
+              <button class="primary-button" type="button" data-action="close-developer">Закрыть</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const closeButton = modalRoot.querySelector('.dialog-close');
+      const primaryCloseButton = modalRoot.querySelector('[data-action="close-developer"]');
+      const closeDeveloperModal = () => closeModal();
+
+      closeButton.addEventListener('click', closeDeveloperModal);
+      primaryCloseButton.addEventListener('click', closeDeveloperModal);
+      modalRoot.querySelector('.modal-overlay').addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) closeDeveloperModal();
+      });
     }
 
     function applyTheme(theme) {
@@ -1674,6 +1814,7 @@
 
     ponyButton.addEventListener('click', handlePonyClick);
     settingsButton.addEventListener('click', openSettingsModal);
+    document.getElementById('developerCard').addEventListener('click', openDeveloperModal);
     document.getElementById('themeToggleButton').addEventListener('click', () => {
       applyTheme(state.settings.theme === 'dark' ? 'light' : 'dark');
       saveGame();
