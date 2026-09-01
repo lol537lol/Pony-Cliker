@@ -95,9 +95,16 @@
       pointer-events: none;
     }
 
+    .retro-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
     .badge {
       display: inline-block;
-      margin-top: 18px;
       padding: 8px 12px;
       border-radius: 999px;
       background: rgba(255,255,255,0.08);
@@ -106,6 +113,26 @@
       font-size: 0.85rem;
       letter-spacing: 0.06em;
       text-transform: uppercase;
+    }
+
+    .home-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 180px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #8b68ff, #5f48d9);
+      color: white;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 8px 20px rgba(95, 72, 217, 0.35);
+      transition: transform 0.12s ease, box-shadow 0.2s ease;
+    }
+
+    .home-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 22px rgba(95, 72, 217, 0.45);
     }
 
     .easter-egg {
@@ -191,9 +218,13 @@
     <h1>Pony Clicker</h1>
     <button class="click-button" id="clickButton" type="button">
       Нажми на пони
-      <img src="images/pony.png?v=retro-2026" alt="Pony" />
+      <img src="images/old_pony.png?v=retro-2026" alt="Pony" />
     </button>
-    <div class="badge">Старая версия • 2 года назад</div>
+
+    <div class="retro-actions">
+      <div class="badge">Старая версия 2 года назад</div>
+      <a class="home-button" href="./index.html">Вернуться домой</a>
+    </div>
   </div>
 
   <div class="easter-egg" aria-label="Секрет" title="Секрет">(\ - c -</div>

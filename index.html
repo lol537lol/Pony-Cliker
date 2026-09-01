@@ -59,6 +59,11 @@
 
     * { box-sizing: border-box; }
 
+    html {
+      scrollbar-color: rgba(137, 110, 188, 0.7) rgba(255,255,255,0.12);
+      scrollbar-width: thin;
+    }
+
     html, body {
       margin: 0;
       min-height: 100%;
@@ -69,6 +74,26 @@
       color: var(--text);
       overflow-x: hidden;
       transition: background 180ms ease, color 180ms ease;
+    }
+
+    ::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(149, 127, 211, 0.92), rgba(111, 89, 186, 0.82));
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(140, 109, 214, 1), rgba(93, 72, 171, 0.94));
     }
 
     body[data-theme="dark"] {
@@ -133,6 +158,36 @@
       width: 100%;
       cursor: pointer;
       transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    }
+
+    .changelog-list {
+      display: grid;
+      gap: 14px;
+      max-height: 430px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .changelog-version {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      padding: 12px 14px;
+    }
+
+    .changelog-version h4 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      color: var(--gold-strong);
+    }
+
+    .changelog-version ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--text);
+      display: grid;
+      gap: 6px;
+      line-height: 1.5;
     }
 
     body[data-theme="dark"] .developer-card {
@@ -221,6 +276,43 @@
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+    }
+
+    body[data-completed="true"] {
+      background:
+        radial-gradient(circle at top, rgba(255, 202, 103, 0.35), transparent 25%),
+        radial-gradient(circle at 20% 30%, rgba(255, 138, 205, 0.26), transparent 18%),
+        linear-gradient(180deg, #fffdf3 0%, #f8ecff 38%, #eef7ff 100%);
+    }
+
+    body[data-completed="true"] .panel,
+    body[data-completed="true"] .developer-card {
+      box-shadow: 0 16px 36px rgba(255, 189, 77, 0.18), 0 0 0 1px rgba(255, 230, 173, 0.3);
+    }
+
+    body[data-theme="dark"][data-completed="true"] {
+      background:
+        radial-gradient(circle at top, rgba(255, 190, 91, 0.15), transparent 30%),
+        radial-gradient(circle at 70% 20%, rgba(179, 117, 255, 0.18), transparent 20%),
+        linear-gradient(180deg, #120f1a 0%, #181521 36%, #171c24 100%);
+    }
+
+    .victory-confetti {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 10px;
+      height: 14px;
+      pointer-events: none;
+      z-index: 60;
+      opacity: 0.95;
+      animation: confettiFall 1.7s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translate3d(0, -18px, 0) rotate(0deg) scale(1); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translate3d(var(--dx), 100vh, 0) rotate(720deg) scale(0.9); opacity: 0; }
     }
 
     .developer-profile {
@@ -1082,6 +1174,10 @@
         <strong>Black Smoke</strong>
       </div>
     </button>
+
+    <button id="changelogButtonFooter" class="secondary-button" type="button" style="align-self: center; min-width: 220px;">
+      Список изменений
+    </button>
   </div>
 
   <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
@@ -1089,6 +1185,9 @@
 
   <script>
     const STORAGE_KEY = 'pony-clicker-save-v1';
+    const WELCOME_SEEN_KEY = 'pony-clicker-welcome-seen';
+    const VERSION_STORAGE_KEY = 'pony-clicker-version';
+    const GAME_VERSION = '2.9';
     const COMBO_TIMEOUT_MS = 1600;
     const AUTOSAVE_INTERVAL_MS = 5000;
     const MEGA_CHEAT_CODE = 'ponycheat';
@@ -1159,13 +1258,123 @@
       { id: 'click_master', name: 'Мастер кликов', icon: '🖱️', description: 'Сделай 500 кликов.', check: (state) => state.statistics.totalClicks >= 500 },
       { id: 'critical_master', name: 'Мастер критов', icon: '💥', description: 'Совершай 25 критических ударов.', check: (state) => state.statistics.criticalClicks >= 25 },
       { id: 'combo_master', name: 'Мастер комбо', icon: '⚡', description: 'Достигни комбо 25.', check: (state) => state.statistics.maxCombo >= 25 },
-      { id: 'millionaire', name: 'Миллионер', icon: '👑', description: 'Накопи 1 000 000 монет.', check: (state) => state.totalCoins >= 1000000 },
+      { id: 'millionaire', name: 'Богач', icon: '👑', description: 'Сделай 6000 кликов.', check: (state) => state.statistics.totalClicks >= 6000 },
       { id: 'collector', name: 'Коллекционер', icon: '🧺', description: 'Разблокируй каждое достижение.', check: (state) => Object.keys(state.achievements).length >= ACHIEVEMENTS.length },
       { id: 'easter_egg', name: 'Пасхалка', icon: '🐾', description: 'Найди скрытый секрет.', check: (state) => Boolean(state.achievements.easter_egg) }
     ];
 
+    const CHANGELOG_ENTRIES = [
+      {
+        version: '0.1',
+        items: [
+          'Прототип игры: базовый клик по пони и счётчик монет.',
+          'Начальная механика клика без улучшений и прогрессии.',
+          'Первый рабочий HTML-скрипт для теста игрового цикла.'
+        ]
+      },
+      {
+        version: '0.2',
+        items: [
+          'Добавлены первые монеты после клика и минимальная анимация.',
+          'Появился простой интерфейс с таблицей счёта и базовым визуальным состоянием.',
+          'Подготовлена основа под расширение системы улучшений.'
+        ]
+      },
+      {
+        version: '0.5',
+        items: [
+          'Добавлены улучшения: сила клика, шанс крита и авто-помощник.',
+          'Появилась базовая система сохранения в localStorage.',
+          'Игра стала более устойчивой и заметно более играбельной.'
+        ]
+      },
+      {
+        version: '1.0',
+        items: [
+          'Полный переработанный интерфейс в современном стиле.',
+          'Добавлены уровни, опыт, шкала прогресса и система комбо.',
+          'Появились первые панели улучшений, статистики и достижений.'
+        ]
+      },
+      {
+        version: '1.3',
+        items: [
+          'Добавлены достижения и система появления наград за прогресс.',
+          'Расширен игровой цикл и улучшено отображение статистики.',
+          'Сделана более стабильная экономическая модель игры.'
+        ]
+      },
+      {
+        version: '1.6',
+        items: [
+          'Добавлена система тем: светлая и тёмная.',
+          'Появились модальные окна и декоративные панели.',
+          'Внесены первые визуальные правки и улучшения UX.'
+        ]
+      },
+      {
+        version: '1.9',
+        items: [
+          'Сделан полноценный разработчик-модал и история проекта.',
+          'Проведена локализация интерфейса на русский язык.',
+          'Добавлены более чистые стили для кнопок и уровней.'
+        ]
+      },
+      {
+        version: '2.0',
+        items: [
+          'Полная переработка архитектуры игры под продвинутый incremental цикл.',
+          'Сделаны сложные улучшения, статистика, убийство фрустрации и плавные анимации.',
+          'Геймплей стал более долгим, насыщенным и мотивирующим.'
+        ]
+      },
+      {
+        version: '2.2',
+        items: [
+          'Добавлены звуки кликов и событий, работающие через Web Audio.',
+          'Добавлены попапы, уведомления и новые эффекты частиц.',
+          'Сделаны визуальные улучшения для клик-механики и панели прогресса.'
+        ]
+      },
+      {
+        version: '2.4',
+        items: [
+          'Добавлены чит-коды и система ранних бонусов.',
+          'Появился ввод кода в настройках и автоматическое применение.',
+          'Сделана система редких бонусных чипов из кнопки пони.'
+        ]
+      },
+      {
+        version: '2.5',
+        items: [
+          'Добавлено окно старой версии и отдельная старинная страница Pony Clicker.',
+          'Появилась логика возврата к ретро-сборке через чит-код old.',
+          'Выполнена работа над историей проекта и ретро-воспоминаниями.'
+        ]
+      },
+      {
+        version: '2.6',
+        items: [
+          'Добавлены финальные чит-коды, пользовательские настройки и улучшения интерфейса.',
+          'Доработаны глобальная тема, модальные окна и панель управления.',
+          'Сделаны более гибкие формы прогрессии и более глубокая система подачи наград.'
+        ]
+      },
+      {
+        version: '2.7v',
+        items: [
+          'Готова финальная версия проекта с полноценным игровым циклом.',
+          'Добавлено приветственное окно при первом запуске.',
+          'Добавлена система прохождения игры, финальный поздравительный экран и конфетти.',
+          'Добавлена возможность отключать главный чит ponycheat в настройках.',
+          'Сделан журнал изменений с описанием истории релизов от 0.1 до 2.7v.'
+        ]
+      }
+    ];
+
     const defaultState = () => ({
       saveVersion: 1,
+      gameVersion: GAME_VERSION,
       coins: 0,
       totalCoins: 0,
       level: 1,
@@ -1185,6 +1394,7 @@
         autoClicker: 0
       },
       achievements: {},
+      completedGame: false,
       cheatCodesUsed: {
         mega: false
       },
@@ -1207,6 +1417,7 @@
         reducedMotion: false,
         autosave: true,
         cheatAutoApply: true,
+        mainCheatEnabled: true,
         theme: 'light'
       }
     });
@@ -1302,6 +1513,7 @@
         const merged = { ...fallback, ...parsed, settings: { ...fallback.settings, ...(parsed.settings || {}) }, upgrades: { ...fallback.upgrades, ...(parsed.upgrades || {}) }, achievements: parsed.achievements || {}, statistics: { ...fallback.statistics, ...(parsed.statistics || {}) } };
         if (typeof merged.coins !== 'number' || Number.isNaN(merged.coins)) merged.coins = 0;
         if (typeof merged.totalCoins !== 'number' || Number.isNaN(merged.totalCoins)) merged.totalCoins = 0;
+        if (typeof merged.completedGame !== 'boolean') merged.completedGame = false;
         return merged;
       } catch (error) {
         return defaultState();
@@ -1311,6 +1523,7 @@
     function saveGame() {
       const payload = {
         saveVersion: 1,
+        gameVersion: GAME_VERSION,
         coins: Number(state.coins) || 0,
         totalCoins: Number(state.totalCoins) || 0,
         level: Number(state.level) || 1,
@@ -1324,6 +1537,7 @@
         lastClickAt: Number(state.lastClickAt) || 0,
         upgrades: { ...state.upgrades },
         achievements: { ...state.achievements },
+        completedGame: Boolean(state.completedGame),
         cheatCodesUsed: { ...(state.cheatCodesUsed || { mega: false }) },
         statistics: { ...state.statistics },
         settings: { ...state.settings }
@@ -1407,6 +1621,11 @@
 
       const normalized = value.toLowerCase();
       if (normalized === MEGA_CHEAT_CODE) {
+        if (!state.settings.mainCheatEnabled) {
+          showToast('Главный чит-код отключён в настройках', 'warning');
+          return false;
+        }
+        closeModal();
         unlockAllAchievements();
         return true;
       }
@@ -1445,22 +1664,45 @@
     function unlockAllAchievements() {
       if (state.cheatCodesUsed?.mega) {
         showToast('Чит-код уже активирован', 'warning');
+        closeModal();
         return;
       }
 
       state.cheatCodesUsed = { ...(state.cheatCodesUsed || {}), mega: true };
+
       ACHIEVEMENTS.forEach((achievement) => {
         state.achievements[achievement.id] = { unlockedAt: Date.now() };
       });
 
-      const reward = 2000000;
+      Object.keys(UPGRADE_META).forEach((key) => {
+        state.upgrades[key] = UPGRADE_META[key].maxLevel;
+      });
+
+      state.clickPower = 2500;
+      state.criticalChance = 0.95;
+      state.criticalMultiplier = 25;
+      state.level = 99;
+      state.xp = state.xpRequired;
+
+      const reward = 50000000;
       state.coins += reward;
       state.totalCoins += reward;
       state.statistics.totalCoins += reward;
 
-      showToast('Чит-код активирован! Все достижения открыты и выдано 2 000 000 монет.', 'critical');
-      window.alert('Чит-код активирован! Все достижения открыты и на счёт зачислено 2 000 000 монет.');
+      closeModal();
+      showToast('Чит-код ponycheat активирован: всё открыто, магазин прокачан до предела и окно настроек закрыто.', 'critical');
+      window.alert('Чит-код ponycheat активирован! Все достижения открыты, магазин прокачан до предела и прогресс превращён в божеский буст.');
       playAchievementSound();
+      evaluateAchievements();
+      renderAll();
+      saveGame();
+    }
+
+    function spawnRareCheatChip() {
+      const bonus = SMALL_CHEAT_CODES[Math.floor(Math.random() * SMALL_CHEAT_CODES.length)];
+      const ponyRect = ponyButton.getBoundingClientRect();
+      const chip = document.createElement('button');
+      chip.type = 'button';
       chip.className = 'rare-cheat-chip';
       chip.innerHTML = `<span>${bonus.code}</span><small>${bonus.label}</small>`;
 
@@ -1514,6 +1756,169 @@
       });
 
       document.body.appendChild(overlay);
+    }
+
+    function spawnConfettiBurst() {
+      const colors = ['#ffca63', '#ff7eb6', '#7ad7ff', '#9af0a9', '#b19cff', '#ff8d66'];
+      for (let i = 0; i < 120; i += 1) {
+        const confetti = document.createElement('span');
+        confetti.className = 'victory-confetti';
+        confetti.style.left = `${Math.random() * window.innerWidth}px`;
+        confetti.style.top = '0px';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.setProperty('--dx', `${(Math.random() - 0.5) * 260}px`);
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(confetti);
+        window.setTimeout(() => confetti.remove(), 1800);
+      }
+    }
+
+    function openVictoryModal() {
+      if (state.completedGame && modalRoot.innerHTML) return;
+
+      state.completedGame = true;
+      document.body.dataset.completed = 'true';
+      spawnConfettiBurst();
+      playAchievementSound();
+      showToast('Игра пройдена! Поздравляем!', 'critical');
+
+      modalRoot.innerHTML = `
+        <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="victory-title">
+          <div class="modal-window developer-modal-window" style="max-width:560px;">
+            <div class="modal-header">
+              <h3 id="victory-title">🏆 Игра пройдена!</h3>
+              <button class="dialog-close" type="button" aria-label="Закрыть окно победы">×</button>
+            </div>
+
+            <div class="developer-story">
+              <p>
+                Ты прошёл Pony Clicker до конца! Все достижения собраны, прогресс доведён до победного финиша,
+                а сам сайт теперь сияет праздничной атмосферой победы.
+              </p>
+              <p>
+                Это не просто кликер — это история о возвращении, мотивации и радости от постоянного улучшения.
+                Пони уже гордится тобой.
+              </p>
+            </div>
+
+            <div class="developer-meta">
+              <div><span>Статус</span><strong>Пройдено</strong></div>
+              <div><span>Уровень</span><strong>${state.level}</strong></div>
+              <div><span>Монет</span><strong>${formatNumber(state.totalCoins)}</strong></div>
+            </div>
+
+            <div class="modal-actions">
+              <button class="primary-button" type="button" data-action="close-victory">Продолжить</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const closeButton = modalRoot.querySelector('.dialog-close');
+      const continueButton = modalRoot.querySelector('[data-action="close-victory"]');
+      const closeVictory = () => closeModal();
+
+      closeButton.addEventListener('click', closeVictory);
+      continueButton.addEventListener('click', closeVictory);
+      modalRoot.querySelector('.modal-overlay').addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) closeVictory();
+      });
+
+      saveGame();
+    }
+
+    function openVersionUpdateModal() {
+      modalRoot.innerHTML = `
+        <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="update-title">
+          <div class="modal-window developer-modal-window" style="max-width:620px;">
+            <div class="modal-header">
+              <h3 id="update-title">Обновление до версии 2.8</h3>
+              <button class="dialog-close" type="button" aria-label="Закрыть окно обновления">×</button>
+            </div>
+
+            <div class="developer-story">
+              <p>
+                Pony Clicker обновился до <strong>версии 2.8</strong>. Игра автоматически переносит прогресс,
+                включает новый набор функций и открывает свежий журнал изменений.
+              </p>
+              <p>
+                В этом релизе: приветственный экран, обновлённые условия победы, новые настройки,
+                управление чит-кодами и полноценное окно с историей обновлений.
+              </p>
+            </div>
+
+            <div class="changelog-list" style="max-height:250px;">
+              <div class="changelog-version">
+                <h4>v2.8</h4>
+                <ul>
+                  <li>Добавлен приветственный экран при первом запуске.</li>
+                  <li>Появился журнал изменений и кнопка под разработчиком.</li>
+                  <li>Добавлен автоапдейт версии и перенаправление на актуальный билд.</li>
+                  <li>Главный чит ponycheat можно отключить в настройках.</li>
+                  <li>Добавлены финальные поздравления и режим прохождения игры.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button class="primary-button" type="button" data-action="apply-update">Обновить игру</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const closeButton = modalRoot.querySelector('.dialog-close');
+      const continueButton = modalRoot.querySelector('[data-action="apply-update"]');
+      const finishUpdate = () => {
+        localStorage.setItem(VERSION_STORAGE_KEY, GAME_VERSION);
+        state.gameVersion = GAME_VERSION;
+        saveGame();
+        window.location.reload();
+      };
+
+      closeButton.addEventListener('click', finishUpdate);
+      continueButton.addEventListener('click', finishUpdate);
+      modalRoot.querySelector('.modal-overlay').addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) finishUpdate();
+      });
+    }
+
+    function openChangelogModal() {
+      modalRoot.innerHTML = `
+        <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="changelog-title">
+          <div class="modal-window developer-modal-window" style="max-width:700px;">
+            <div class="modal-header">
+              <h3 id="changelog-title">Журнал изменений</h3>
+              <button class="dialog-close" type="button" aria-label="Закрыть журнал изменений">×</button>
+            </div>
+
+            <div class="changelog-list">
+              ${CHANGELOG_ENTRIES.map((entry) => `
+                <div class="changelog-version">
+                  <h4>v${entry.version}</h4>
+                  <ul>
+                    ${entry.items.map((item) => `<li>${item}</li>`).join('')}
+                  </ul>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="modal-actions">
+              <button class="primary-button" type="button" data-action="close-changelog">Закрыть</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const closeButton = modalRoot.querySelector('.dialog-close');
+      const primaryCloseButton = modalRoot.querySelector('[data-action="close-changelog"]');
+      const closeChangelog = () => closeModal();
+
+      closeButton.addEventListener('click', closeChangelog);
+      primaryCloseButton.addEventListener('click', closeChangelog);
+      modalRoot.querySelector('.modal-overlay').addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) closeChangelog();
+      });
     }
 
     function openDeveloperModal() {
@@ -1571,6 +1976,16 @@
       modalRoot.querySelector('.modal-overlay').addEventListener('click', (event) => {
         if (event.target === event.currentTarget) closeDeveloperModal();
       });
+    }
+
+    function initVersionUpgradeCheck() {
+      const savedVersion = localStorage.getItem(VERSION_STORAGE_KEY) || state.gameVersion || '0';
+      if (savedVersion !== GAME_VERSION) {
+        state.gameVersion = GAME_VERSION;
+        openVersionUpdateModal();
+      } else {
+        state.gameVersion = GAME_VERSION;
+      }
     }
 
     function applyTheme(theme) {
@@ -1812,6 +2227,23 @@
       state.statistics.achievementsUnlocked = unlockedCount;
       renderAchievements();
       renderCollection();
+      checkVictoryCondition();
+    }
+
+    function checkVictoryCondition() {
+      const allAchievementsUnlocked = Object.keys(state.achievements).length >= ACHIEVEMENTS.length;
+      const enoughCoins = state.totalCoins >= 1000000;
+      const highEnoughLevel = state.level >= 25;
+      const isCompleted = allAchievementsUnlocked && enoughCoins && highEnoughLevel;
+
+      if (isCompleted && !state.completedGame) {
+        openVictoryModal();
+      }
+
+      if (!isCompleted && state.completedGame) {
+        state.completedGame = false;
+        document.body.dataset.completed = 'false';
+      }
     }
 
     function handlePonyClick() {
@@ -1934,6 +2366,14 @@
                 <button class="toggle ${state.settings.cheatAutoApply ? 'active' : ''}" data-setting="cheatAutoApply" type="button" aria-label="Переключить автоприменение чит-кодов" aria-pressed="${state.settings.cheatAutoApply}"></button>
               </div>
 
+              <div class="toggle-row">
+                <div class="label-wrap">
+                  <span>Главный чит ponycheat</span>
+                  <small>Отключить активацию чит-кода ponycheat</small>
+                </div>
+                <button class="toggle ${state.settings.mainCheatEnabled ? 'active' : ''}" data-setting="mainCheatEnabled" type="button" aria-label="Переключить главный чит ponycheat" aria-pressed="${state.settings.mainCheatEnabled}"></button>
+              </div>
+
               <div class="cheat-panel">
                 <div class="cheat-input-row">
                   <input id="cheatCodeInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Введите чит-код..." />
@@ -1975,6 +2415,8 @@
             </div>
 
             <div class="modal-actions">
+              <button class="secondary-button" id="welcomeScreenButton" type="button">Вернуться на страницу приветствия</button>
+              <button class="secondary-button" id="changelogButton" type="button">Журнал изменений</button>
               <button class="secondary-button" id="closeModalButton" type="button">Закрыть</button>
               <button class="danger-button" id="resetProgressButton" type="button">Сбросить прогресс</button>
             </div>
@@ -1983,6 +2425,15 @@
       `;
 
       modalRoot.querySelector('.dialog-close').addEventListener('click', closeModal);
+      modalRoot.querySelector('#welcomeScreenButton').addEventListener('click', () => {
+        closeModal();
+        localStorage.setItem(WELCOME_SEEN_KEY, '0');
+        openWelcomeScreen();
+      });
+      modalRoot.querySelector('#changelogButton').addEventListener('click', () => {
+        closeModal();
+        openChangelogModal();
+      });
       modalRoot.querySelector('#closeModalButton').addEventListener('click', closeModal);
       modalRoot.querySelector('#resetProgressButton').addEventListener('click', resetProgress);
       const themeToggle = modalRoot.querySelector('[data-theme-toggle]');
@@ -2042,6 +2493,43 @@
       modalState = null;
     }
 
+    function openWelcomeScreen() {
+      modalRoot.innerHTML = `
+        <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+          <div class="modal-window" style="max-width:560px;">
+            <div class="modal-header">
+              <h3 id="welcome-title">Добро пожаловать в Pony Clicker</h3>
+            </div>
+
+            <div class="developer-story">
+              <p>
+                Нажимай на пони, собирай монеты, прокачивай улучшения, открывай достижения и выводи проект на новый уровень.
+              </p>
+              <p>
+                Здесь есть прогресс, атмосфера, чит-коды, светлая и тёмная тема, а также собственная история о возвращении проекта.
+              </p>
+            </div>
+
+            <div class="modal-actions">
+              <button class="primary-button" type="button" data-action="start-game">Начать игру</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const startButton = modalRoot.querySelector('[data-action="start-game"]');
+      if (startButton) {
+        startButton.addEventListener('click', () => closeModal());
+      }
+
+      modalRoot.querySelector('.modal-overlay').addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) {
+          localStorage.setItem(WELCOME_SEEN_KEY, '1');
+          closeModal();
+        }
+      });
+    }
+
     function resetProgress() {
       showCustomConfirm({
         title: 'Сброс прогресса',
@@ -2070,6 +2558,11 @@
       }
 
       if (!state.settings.cheatAutoApply) {
+        return;
+      }
+
+      if (typedCheatBuffer.includes(MEGA_CHEAT_CODE) && !state.settings.mainCheatEnabled) {
+        typedCheatBuffer = '';
         return;
       }
 
@@ -2108,11 +2601,25 @@
       }
     }
 
+    document.body.dataset.completed = String(Boolean(state.completedGame));
+    if (state.completedGame) {
+      document.body.dataset.completed = 'true';
+    }
+
+    const hasSavedProgress = Boolean(localStorage.getItem(STORAGE_KEY));
+    const hasWelcomeBeenSeen = localStorage.getItem(WELCOME_SEEN_KEY) === '1';
+    initVersionUpgradeCheck();
+
+    if ((!hasSavedProgress || !hasWelcomeBeenSeen) && !state.completedGame) {
+      openWelcomeScreen();
+    }
+
     applyTheme(state.settings.theme || 'light');
 
     ponyButton.addEventListener('click', handlePonyClick);
     settingsButton.addEventListener('click', openSettingsModal);
     document.getElementById('developerCard').addEventListener('click', openDeveloperModal);
+    document.getElementById('changelogButtonFooter').addEventListener('click', openChangelogModal);
     document.getElementById('themeToggleButton').addEventListener('click', () => {
       applyTheme(state.settings.theme === 'dark' ? 'light' : 'dark');
       saveGame();
