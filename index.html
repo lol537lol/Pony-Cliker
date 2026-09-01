@@ -1092,6 +1092,8 @@
     const COMBO_TIMEOUT_MS = 1600;
     const AUTOSAVE_INTERVAL_MS = 5000;
     const MEGA_CHEAT_CODE = 'ponycheat';
+    const RETRO_VERSION_CODE = 'old';
+    const OLD_VERSION_PATH = './old-index.html';
     const SMALL_CHEAT_CODES = [
       { code: 'SPARK', label: '+500 монет', coins: 500 },
       { code: 'GLINT', label: '+750 монет', coins: 750 },
@@ -1390,6 +1392,12 @@
       }, 2600);
     }
 
+    function activateRetroVersion() {
+      showToast('Чит-код OLD активирован: возврат к ретро-версии Pony Clicker.', 'warning');
+      window.alert('Чит-код OLD активирован. Вы переноситесь в версию Pony Clicker двухлетней давности.');
+      window.location.href = OLD_VERSION_PATH;
+    }
+
     function applyCheatCode(rawCode) {
       const value = String(rawCode || '').trim();
       if (!value) {
@@ -1400,6 +1408,11 @@
       const normalized = value.toLowerCase();
       if (normalized === MEGA_CHEAT_CODE) {
         unlockAllAchievements();
+        return true;
+      }
+
+      if (normalized === RETRO_VERSION_CODE) {
+        activateRetroVersion();
         return true;
       }
 
@@ -2077,6 +2090,12 @@
       if (typedCheatBuffer.includes(MEGA_CHEAT_CODE)) {
         typedCheatBuffer = '';
         unlockAllAchievements();
+        return;
+      }
+
+      if (typedCheatBuffer.includes(RETRO_VERSION_CODE)) {
+        typedCheatBuffer = '';
+        activateRetroVersion();
         return;
       }
 

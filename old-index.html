@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pony Clicker (old)</title>
+  <style>
+    :root {
+      --bg: #0d0d14;
+      --panel: rgba(26, 22, 32, 0.88);
+      --panel-strong: rgba(38, 32, 48, 0.96);
+      --text: #f1f1ff;
+      --muted: #d8d1ea;
+      --green: #4caf50;
+      --gold: #ffd700;
+      --danger: #f44336;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #0b0a12;
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(rgba(9, 8, 16, 0.8), rgba(9, 8, 16, 0.8)),
+        url('images/background.jpg') center/cover no-repeat fixed;
+    }
+
+    .retro-shell {
+      position: relative;
+      width: min(680px, 90vw);
+      text-align: center;
+      padding: 26px 22px;
+      border-radius: 18px;
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.4);
+    }
+
+    .retro-shell h1 {
+      margin: 0 0 18px;
+      font-size: clamp(2rem, 5vw, 3rem);
+      color: #f8f5ff;
+    }
+
+    .retro-counter {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      color: var(--gold);
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      font-weight: 700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+
+    .click-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #5bc96a, #2c8f3a);
+      color: white;
+      padding: 18px 28px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      transition: transform 0.12s ease, box-shadow 0.2s ease;
+    }
+
+    .click-button:hover {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.32);
+    }
+
+    .click-button:active {
+      transform: scale(0.97);
+    }
+
+    .click-button img {
+      width: 54px;
+      height: auto;
+      pointer-events: none;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--muted);
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .easter-egg {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2rem;
+      opacity: 0.9;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .congrats-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.8);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease;
+      z-index: 10;
+    }
+
+    .congrats-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .congrats-window {
+      width: min(520px, 88vw);
+      background: var(--panel-strong);
+      border-radius: 16px;
+      padding: 28px 22px 20px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 16px 44px rgba(0,0,0,0.35);
+      transform: translateY(18px);
+      transition: transform 0.3s ease;
+    }
+
+    .congrats-overlay.visible .congrats-window {
+      transform: translateY(0);
+    }
+
+    .congrats-window h2 {
+      margin: 0 0 12px;
+      color: var(--green);
+      font-size: 2rem;
+    }
+
+    .congrats-window p {
+      margin: 10px 0;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .congrats-window img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 14px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.26);
+    }
+
+    .close-button {
+      margin-top: 18px;
+      border: none;
+      border-radius: 10px;
+      background: var(--danger);
+      color: white;
+      font-weight: 700;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="retro-counter" id="coinCounter">Монеты: 0</div>
+
+  <div class="retro-shell">
+    <h1>Pony Clicker</h1>
+    <button class="click-button" id="clickButton" type="button">
+      Нажми на пони
+      <img src="images/pony.png?v=retro-2026" alt="Pony" />
+    </button>
+    <div class="badge">Старая версия • 2 года назад</div>
+  </div>
+
+  <div class="easter-egg" aria-label="Секрет" title="Секрет">(\ - c -</div>
+
+  <div class="congrats-overlay" id="congratsOverlay" aria-live="polite">
+    <div class="congrats-window">
+      <h2>Поздравляем!</h2>
+      <p>Ты собрал 30 монет и прорвался через первый порог!</p>
+      <p>Black Smoke</p>
+      <img src="images/congrats.png?v=retro-2026" alt="Congrats" />
+      <div>
+        <button class="close-button" id="closeCongrats" type="button">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let coinCount = 0;
+    const maxCoins = 30;
+    const coinCounter = document.getElementById('coinCounter');
+    const clickButton = document.getElementById('clickButton');
+    const congratsOverlay = document.getElementById('congratsOverlay');
+    const closeCongrats = document.getElementById('closeCongrats');
+
+    clickButton.addEventListener('click', () => {
+      coinCount += 1;
+      coinCounter.textContent = `Монеты: ${coinCount}`;
+      if (coinCount >= maxCoins) {
+        congratsOverlay.classList.add('visible');
+      }
+    });
+
+    closeCongrats.addEventListener('click', () => {
+      congratsOverlay.classList.remove('visible');
+    });
+
+    document.querySelector('.easter-egg').addEventListener('click', () => {
+      alert('Секрет старой версии найден!');
+    });
+  </script>
+</body>
+</html>
