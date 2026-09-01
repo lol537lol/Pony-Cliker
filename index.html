@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Pony Clicker — монетный кликер с пони, улучшениями, достижениями и чит-кодами." />
+  <meta property="og:title" content="Pony Clicker" />
+  <meta property="og:description" content="Кликер про пони: монеты, прокачка, достижения и тёмная тема." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://lol537lol.github.io/Pony-Cliker/" />
+  <meta property="og:image" content="https://lol537lol.github.io/Pony-Cliker/images/pony.png" />
+  <meta name="twitter:card" content="summary_large_image" />
   <title>Pony Clicker</title>
   <style>
     :root {
@@ -141,6 +148,87 @@
       box-shadow: 0 14px 32px var(--shadow);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
+    }
+
+    .game-cover {
+      display: grid;
+      grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: center;
+      padding: 22px 22px 18px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(146, 126, 214, 0.14), rgba(255,255,255,0.15));
+    }
+
+    .game-cover-art {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.45), rgba(136, 118, 208, 0.10) 36%, rgba(30, 20, 46, 0.12) 100%);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      min-height: 220px;
+      padding: 18px;
+    }
+
+    .game-cover-art img {
+      width: min(100%, 180px);
+      height: auto;
+      filter: drop-shadow(0 18px 25px rgba(92, 73, 150, 0.18));
+    }
+
+    .game-cover-copy {
+      display: grid;
+      gap: 12px;
+    }
+
+    .game-cover-copy .eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .game-cover-copy h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .game-cover-copy p {
+      margin: 0;
+      max-width: 640px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .game-cover-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .game-cover-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      min-width: 170px;
+      font-weight: 800;
+    }
+
+    .game-cover-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      text-decoration: none;
     }
 
     .developer-card {
@@ -1091,6 +1179,23 @@
 </head>
 <body>
   <div class="app-shell">
+    <section class="game-cover panel" aria-label="Обложка игры Pony Clicker">
+      <div class="game-cover-art">
+        <img src="images/pony.png?v=2026-09-01-1" alt="Pony Clicker cover art" />
+      </div>
+      <div class="game-cover-copy">
+        <span class="eyebrow">Pony Clicker</span>
+        <h1>Кликер про пони, монеты и прокачку.</h1>
+        <p>
+          Нажимай на пони, собирай валюту, открывай улучшения, выполняй достижения и наслаждайся яркой игровой атмосферой в светлой и тёмной теме.
+        </p>
+        <div class="game-cover-actions">
+          <a class="primary-button game-cover-link" href="#ponyButton">Играть сейчас</a>
+          <a class="game-cover-secondary" href="#developerCard">Узнать больше</a>
+        </div>
+      </div>
+    </section>
+
     <header class="top-bar panel" aria-label="Игровой заголовок">
       <div class="hud-block">
         <div>
